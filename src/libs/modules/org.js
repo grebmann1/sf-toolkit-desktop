@@ -58,7 +58,7 @@ getAllOrgs = async (_) => {
     console.log('getAllOrgs');
     try{
         const command = 'sfdx force:org:list --json --verbose';
-        let res = execSync(command,{cwd: app.getAppPath()}).toString();
+        let res = execSync(command).toString();
         return JSON.parse(res);//{result:JSON.parse(res).result};
     }catch(e){
         return {error: encodeError(e)}
@@ -138,7 +138,7 @@ logout = async (_,{alias}) => {
     /** To Refactore later **/
     try{
         const command = `sf org logout -o ${alias} -p --json`;
-        let res = execSync(command,{cwd: app.getAppPath()}).toString();
+        let res = execSync(command).toString();
         return {res}
     }catch(e){
         return {res:null}

@@ -1,6 +1,6 @@
 {
     "name": "sf-toolkit-desktop",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "main": "src/main.js",
     "repository": {
         "type": "git",

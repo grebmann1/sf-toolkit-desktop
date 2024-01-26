@@ -1,11 +1,13 @@
+/** Fix Path **/
+require('fix-path')();
+
 const { app,nativeImage } = require('electron');
 const { browserWindows,createMainWindow,createInstanceWindow } = require('./libs/window.js');
 const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
 
 
-/** Fix Path **/
-require('fix-path')();
+
 
 /** Menu **/
 //require('./utils/menu.js');

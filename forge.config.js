@@ -34,11 +34,22 @@ module.exports = {
 		  	config: {
 				repository: {
 						owner: 'grebmann1',
-						name: 'sf-toolkit-desktop'
+						name: 'sfdx-ui-light' // for now we do a direct deploy to the old repo to migrate everyone to the new repo !!!
 				},
 				authToken: process.env.GITHUB_TOKEN,
-				prerelease: true
+				prerelease: false
 		  	}
-		}
+		},
+		{
+			name: '@electron-forge/publisher-github',
+			config: {
+			  repository: {
+					  owner: 'grebmann1',
+					  name: 'sf-toolkit-desktop' // for now we do a direct deploy to the old repo to migrate everyone to the new repo !!!
+			  },
+			  authToken: process.env.GITHUB_TOKEN,
+			  prerelease: false
+			}
+	  }
 	]
 };
