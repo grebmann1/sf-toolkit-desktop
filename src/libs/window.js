@@ -56,8 +56,8 @@ createWindow = ({parent,alwaysOnTop}) => {
 		});
 
 		browserWindow.on('resize', () => {
-			let { width, height } = browserWindow.getBounds();
-			store.set('windowBounds', { width, height });
+			//let { width, height } = browserWindow.getBounds();
+			//store.set('windowBounds', { width, height });
 		});
 
 		browserWindow.on('closed', () => {
