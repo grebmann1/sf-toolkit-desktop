@@ -1,14 +1,13 @@
 const sfdx = require('sfdx-node');
 const path = require('node:path');
-const { spawn } = require('child_process');
+const { exec  } = require('child_process');
 const { encodeError } = require('../utils/errors.js');
 
-scanner = async ({alias}) => {
+scanner = async ({alias,command}) => {
     console.log('scanner - start',alias);
     try{
-        const command = 'sfdx scanner:run --target "force-app/main/default" -f json -o "Inspection/report.json"  --normalize-severit';
         console.log('command',command);
-        const childProcess = spawn(command,[]);
+        const childProcess = exec(command);
 
         // Handle standard output data
         childProcess.stdout.on('data', (data) => {
@@ -23,14 +22,20 @@ scanner = async ({alias}) => {
         // Handle on close
         childProcess.on('close', (code) => {
             console.log(`Child process exited with code ${code}`);
+            const res = {
+                status:'finished',
+                code
+            }
+            process.parentPort.postMessage({res})
         });
     
         // Handle errors
         childProcess.on('error', (error) => {
+            console.error(error);
             console.error(`Error: ${error.message}`);
         });
 
-        process.parentPort.postMessage({res:null})
+        
     }catch(e){
         process.parentPort.postMessage({error: encodeError(e)})
     }

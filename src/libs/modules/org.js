@@ -69,32 +69,32 @@ getAllOrgs = async (_) => {
 }
 
 seeDetails = async (_,{alias}) => {
-    return new Promise(async (resolve,reject) => {
-        try{
-            let res = await sfdx.force.org.display({
+    console.log('seeDetails');
+    return new Promise((resolve,reject) => {
+        Promise.all([
+            sfdx.force.org.display({
                 _quiet:true,
                 json:true,
                 verbose:true,
                 _rejectOnError: true,
                 targetusername: alias
-            });
-            /** Catch it directly */
-            let loginObject = await sfdx.force.org.open({
+            }),
+            sfdx.force.org.open({
                 targetusername:alias,
                 urlonly:true
-            });
+            })
+        ]).then((results) => {
             res = {
-                ...res,
+                ...results[0],
                 ...{
-                    loginUrl:loginObject.url,
-                    orgId:res.id
+                    loginUrl:results[1].url,
+                    orgId:results[0].id
                 }
             };
             resolve({res});
-        }catch(e){
-            console.error(e);
+        }).catch(e => {
             resolve({error: encodeError(e)});
-        }
+        })
     })
 }
 

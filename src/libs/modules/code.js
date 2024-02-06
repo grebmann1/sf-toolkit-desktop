@@ -1,7 +1,7 @@
 const path      = require('path');
 const fs        = require('fs');
 const moment    = require('moment');
-const { execSync } = require('child_process');
+const { exec,execSync } = require('child_process');
 const { app,shell,remote,dialog,utilityProcess } = require('electron');
 
 /** Internal */
@@ -136,7 +136,7 @@ exportMap.retrieveCode = (event,{alias,targetPath,refresh}) => {
     try{
         const webContents = event.sender;
         const userDataPath          = (app || remote.app).getPath('userData');
-        const project_path           = path.join(userDataPath,'Metadata',alias);
+        const project_path          = path.join(userDataPath,'Metadata',alias);
         const sfdxProjectJson_path  = path.join(project_path,'sfdx-project.json');
         const packageXml_path       = path.join(project_path,'manifest','package.xml');
 
@@ -188,18 +188,42 @@ exportMap.retrieveCode = (event,{alias,targetPath,refresh}) => {
     }
 }
 
-exportMap.runSfdxAnalyzer = (event,{targetPath,alias}) => {
+exportMap.runSfdxAnalyzer = (event,{alias,listenerName,command}) => {
     const webContents = event.sender;
+    const userDataPath          = (app || remote.app).getPath('userData');
+    const project_path          = path.join(userDataPath,'Metadata',alias);
+    const sfdxProjectJson_path  = path.join(project_path,'sfdx-project.json');
+
     try{
         _scanCodeWorker({
             alias,
+            targetPath:project_path,
+            webContents,
+            listenerName,
+            command
+        });
+        return {result: {runInWorker:true}}
+    }catch(e){
+        console.error('error',e);
+        webContents.send(listenerName,{type:'codeScanner',action:'error',error});
+        return {error: encodeError(e)}
+    }
+}
+
+exportMap.runShell = (event,{alias,targetPath,listenerName,command}) => {
+    const webContents = event.sender;
+
+    try{
+        _runShell({
+            alias,
             targetPath,
             webContents,
+            listenerName,
+            command
         });
     }catch(e){
         console.error('error',e);
-        webContents.send('update-from-worker',{type:'codeScanner',action:'error',error});
-        return {error: encodeError(e)}
+        webContents.send(listenerName,{type:'shell',action:'error',e});
     }
 }
 
@@ -265,8 +289,8 @@ _retrieveCodeWorker = ({alias,configName,targetPath,manifestPath,webContents}) =
     });
 }
 
-_scanCodeWorker = ({alias,targetPath,webContents}) => {
-
+_scanCodeWorker = ({alias,targetPath,webContents,listenerName,command}) => {
+    console.log('launch _scanCodeWorker');
     let workerKey = `scanner-${alias}`;
     // Kill child process in case it's too long
     const timeout = setTimeout(() => {
@@ -278,24 +302,70 @@ _scanCodeWorker = ({alias,targetPath,webContents}) => {
     if(workers[workerKey]) throw new Error('Existing instance already processing');
     
     workers[workerKey] = utilityProcess.fork(path.join(__dirname, '../../workers/scanner.js'),[],{cwd:targetPath})
-    workers[workerKey].postMessage({params:{alias}});
+    workers[workerKey].postMessage({params:{alias,command}});
     workers[workerKey].once('exit',  () => {
+        console.log('worker exit');
         clearTimeout(timeout);
-        webContents.send('update-from-worker',{type:'codeScanner',action:'exit'});
+        webContents.send(listenerName,{type:'codeScanner',action:'exit'});
         workers[workerKey] = null;
     })
     workers[workerKey].once('message', async (value) => {
+        console.log('worker message',value);
         const {res,error} = value;
         if(res){
-            webContents.send('update-from-worker',{type:'codeScanner',action:'done',data});
+            webContents.send(listenerName,{type:'codeScanner',action:'done',res});
         }else{
-            webContents.send('update-from-worker',{type:'codeScanner',action:'error',error});
+            webContents.send(listenerName,{type:'codeScanner',action:'error',error});
         }
         clearTimeout(timeout);
         workers[workerKey].kill();
     });
 }
 
+_runShell = ({alias,targetPath,webContents,listenerName,command}) => {
+    console.log('launch _runShell');
+    let workerKey = `shell-${alias}`;
+    // Kill child process in case it's too long
+    const timeout = setTimeout(() => {
+        if(workers[workerKey]){
+            //console.log(workers[workerKey])
+            workers[workerKey].kill();
+        }
+    }, 60000*2);
+    if(workers[workerKey]){
+        // throw new Error('Existing instance already processing');
+        workers[workerKey].kill(); // for now i kill the existing one
+    }
+
+    workers[workerKey] = exec(command,{cwd: targetPath});
+
+    // Handle standard output data
+    workers[workerKey].stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+        webContents.send(listenerName,formatResponse({action:'message',data}))
+    });
+
+    // Handle standard error data
+    workers[workerKey].stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+        webContents.send(listenerName,formatResponse({action:'error',data}))
+    });
+
+    // Handle on close
+    workers[workerKey].on('close', (code) => {
+        console.log(`Child process exited with code ${code}`);
+        webContents.send(listenerName,formatResponse({action:'exit',data:''}))
+    });
+}
+
+formatResponse = ({action,data,code,error}) => {
+    return {
+        action,
+        data,
+        code,
+        error
+    }
+}
 
 
 
