@@ -1,7 +1,7 @@
 const sfdx = require('sfdx-node');
 const path = require('path');
 const { app,shell,utilityProcess } = require('electron');
-const { execSync } = require('child_process');
+const { exec, execSync } = require('child_process');
 const { encodeError } = require('../../utils/errors.js');
 
 
@@ -56,41 +56,46 @@ killOauth = async (_) => {
 
 getAllOrgs = async (_) => {
     console.log('getAllOrgs');
-    try{
-        const command = 'sfdx force:org:list --json --verbose';
-        let res = execSync(command).toString();
-        return JSON.parse(res);//{result:JSON.parse(res).result};
-    }catch(e){
-        return {error: encodeError(e)}
-    }
+    const command = 'sfdx force:org:list --json --verbose';
+    return new Promise((resolve,reject) => {
+        exec(command, (error, stdout, stderr) => {
+            if(error){
+                resolve({error: encodeError(error)});
+            }else{
+                resolve(JSON.parse(stdout.toString()))
+            }
+        })
+    })
 }
 
 seeDetails = async (_,{alias}) => {
-    try{
-        let res = await sfdx.force.org.display({
-            _quiet:true,
-            json:true,
-            verbose:true,
-            _rejectOnError: true,
-            targetusername: alias
-        });
-        /** Catch it directly */
-        let loginObject = await sfdx.force.org.open({
-            targetusername:alias,
-            urlonly:true
-        });
-        res = {
-            ...res,
-            ...{
-                loginUrl:loginObject.url,
-                orgId:res.id
-            }
-        };
-        return {res};
-    }catch(e){
-        console.error(e);
-        return {error: encodeError(e)}
-    }
+    return new Promise(async (resolve,reject) => {
+        try{
+            let res = await sfdx.force.org.display({
+                _quiet:true,
+                json:true,
+                verbose:true,
+                _rejectOnError: true,
+                targetusername: alias
+            });
+            /** Catch it directly */
+            let loginObject = await sfdx.force.org.open({
+                targetusername:alias,
+                urlonly:true
+            });
+            res = {
+                ...res,
+                ...{
+                    loginUrl:loginObject.url,
+                    orgId:res.id
+                }
+            };
+            resolve({res});
+        }catch(e){
+            console.error(e);
+            resolve({error: encodeError(e)});
+        }
+    })
 }
 
 openOrgUrl = async (_,{alias,redirectUrl}) => {
