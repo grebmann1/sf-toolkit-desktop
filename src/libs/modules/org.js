@@ -13,10 +13,10 @@ _handleOAuthInWorker = ({alias,instanceurl,webContents}) => {
     const workerKey = 'oauth';
     const timeout = setTimeout(() => {
         if(workers[workerKey]){
-            console.log(workers[workerKey])
+            console.log('kill from setTimeout')
             workers[workerKey].kill();
         }
-    }, 15000*2);
+    }, 60000*2);
 
     workers[workerKey] = utilityProcess.fork(path.join(__dirname, '../../workers/oauth.js'))
     workers[workerKey].postMessage({action:'oauth',params:{alias,instanceurl}});
