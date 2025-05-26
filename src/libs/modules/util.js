@@ -1,12 +1,10 @@
-const { app,dialog } = require('electron');
+const { app, dialog } = require('electron');
 const commandExistsSync = require('command-exists').sync;
 const { encodeError } = require('../../utils/errors.js');
 const Store = require('../store.js');
 
-
-
 checkCommands = async () => {
-    try{
+    try {
         //console.log('sfdx',commandExistsSync('sfdx'));
         //console.log('sfdx2',process.env.PATH);
         //fixPath();
@@ -14,58 +12,57 @@ checkCommands = async () => {
         //console.log('sfdx',commandExistsSync('sfdx'));
         return {
             result: {
-                sfdx:commandExistsSync('sfdx'),
-                java:commandExistsSync('java')
-            }
-        }
-    }catch(e){
-        return {error: encodeError(e)}
+                sfdx: commandExistsSync('sfdx'),
+                java: commandExistsSync('java'),
+            },
+        };
+    } catch (e) {
+        return { error: encodeError(e) };
     }
-}
+};
 
 getAppPath = async () => {
     return app.getAppPath();
-}
+};
 getPath = async (_) => {
     try {
         let selectedPaths = dialog.showOpenDialogSync(null, {
-            title: "Select File",
-            buttonLabel : "Select",
-            properties:['openDirectory','createDirectory','openFile']
+            title: 'Select File',
+            buttonLabel: 'Select',
+            properties: ['openDirectory', 'createDirectory', 'openFile'],
         });
 
-        let selectedPath = selectedPaths === undefined ? null:selectedPaths[0];
+        let selectedPath = selectedPaths === undefined ? null : selectedPaths[0];
 
-        return {result:selectedPath};
+        return { result: selectedPath };
     } catch (e) {
-        return {error: encodeError(e)}
+        return { error: encodeError(e) };
     }
-}
+};
 
-getConfig = async (_,{configName,key}) => {
+getConfig = async (_, { configName, key }) => {
     try {
-        let store = new Store({configName});
-        return {result:store.get(key)};
+        let store = new Store({ configName });
+        return { result: store.get(key) };
     } catch (e) {
-        return {error: encodeError(e)}
+        return { error: encodeError(e) };
     }
-}
+};
 
-setConfig = async (_,{configName,key,value}) => {
+setConfig = async (_, { configName, key, value }) => {
     try {
-        let store = new Store({configName});
-            store.set(key,value);
-        return {result:null};
+        let store = new Store({ configName });
+        store.set(key, value);
+        return { result: null };
     } catch (e) {
-        return {error: encodeError(e)}
+        return { error: encodeError(e) };
     }
-}
-
+};
 
 module.exports = {
     checkCommands,
     getPath,
     getAppPath,
     getConfig,
-    setConfig
-}
+    setConfig,
+};

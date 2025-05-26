@@ -3,46 +3,50 @@ const path = require('path');
 const fs = require('fs');
 
 class Store {
-
-  constructor(opts) {
-    const userDataPath = (electron.app || electron.remote.app).getPath('userData');
-    this.path = path.join(userDataPath,'JSON Store', opts.configName + '.json');
-    this.data = parseDataFile(this.path, opts.defaults || {});
-  }
-
-  isEmpty(){
-    return Object.keys(this.data || {}).length == 0;
-  }
-
-  contains(key){
-    //console.log(`contain for ${key}`,this.data.hasOwnProperty(key));
-    return this.data.hasOwnProperty(key);
-  }
-  
-  get(key) {
-    return this.data[key];
-  }
-  
-  set(key, val) {
-    if(key){
-      this.data[key] = val;
-    }else{
-      this.data = val;
+    constructor(opts) {
+        const userDataPath = (electron.app || electron.remote.app).getPath('userData');
+        this.path = path.join(userDataPath, 'JSON Store', opts.configName + '.json');
+        this.data = parseDataFile(this.path, opts.defaults || {});
     }
-    
-    if(!fs.existsSync(path.dirname(this.path))) {
-      fs.mkdirSync(path.dirname(this.path), { recursive: true }) ;
+
+    isEmpty() {
+        return Object.keys(this.data || {}).length == 0;
     }
-    fs.writeFileSync(this.path, JSON.stringify(this.data));
-  }
+
+    contains(key) {
+        //console.log(`contain for ${key}`,this.data.hasOwnProperty(key));
+        return this.data.hasOwnProperty(key);
+    }
+
+    get(key) {
+        return this.data[key];
+    }
+
+    set(key, val) {
+        if (key) {
+            this.data[key] = val;
+        } else {
+            this.data = val;
+        }
+
+        try {
+            if (!fs.existsSync(path.dirname(this.path))) {
+                fs.mkdirSync(path.dirname(this.path), { recursive: true });
+            }
+            fs.writeFileSync(this.path, JSON.stringify(this.data));
+        } catch (err) {
+            console.error('Failed to write store data:', err);
+        }
+    }
 }
 
 function parseDataFile(filePath, defaults) {
-  try {
-    return JSON.parse(fs.readFileSync(filePath));
-  } catch(error) {
-    return defaults;
-  }
+    try {
+        return JSON.parse(fs.readFileSync(filePath));
+    } catch (error) {
+        console.warn('Failed to read or parse store file, using defaults:', error);
+        return defaults;
+    }
 }
 
 module.exports = Store;

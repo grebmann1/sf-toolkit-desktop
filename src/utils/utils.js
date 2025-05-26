@@ -1,4 +1,4 @@
-const hashCode =  (str) => {
+const hashCode = (str) => {
     let hash = 0;
     for (let i = 0, len = str.length; i < len; i++) {
         let chr = str.charCodeAt(i);
@@ -6,10 +6,10 @@ const hashCode =  (str) => {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
-}
+};
 
-const buffer = {}
-function runActionAfterTimeOut(value, action,{timeout = 300} = {}) {
+const buffer = {};
+function runActionAfterTimeOut(value, action, { timeout = 300 } = {}) {
     if (buffer._clearBufferId) {
         clearTimeout(buffer._clearBufferId);
     }
@@ -20,5 +20,4 @@ function runActionAfterTimeOut(value, action,{timeout = 300} = {}) {
     return buffer._clearBufferId;
 }
 
-
-module.exports = {hashCode,runActionAfterTimeOut};
+module.exports = { hashCode, runActionAfterTimeOut };
