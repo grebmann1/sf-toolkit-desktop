@@ -56,7 +56,5 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
     // On macOS, apps generally stay open until the user explicitly quits
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
 });
