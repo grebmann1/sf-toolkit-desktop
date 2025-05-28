@@ -9,10 +9,11 @@ const store = new Store({
     },
 });
 
-let browserWindows = [];
+// Use a map for browser windows, keyed by alias. 'home' is the default/main window.
+let browserWindows = { home: null };
 exports.browserWindows = browserWindows;
 
-const createWindow = ({ parent, alwaysOnTop }) => {
+const createWindow = ({ parent, alwaysOnTop, alias }) => {
     const windowBounds = store.get('windowBounds') || { width: 1400, height: 900 };
     let browserWindow = new BrowserWindow({
         width: windowBounds.width,
@@ -71,29 +72,45 @@ const createWindow = ({ parent, alwaysOnTop }) => {
         event.preventDefault();
         shell.openExternal(url);
     });
-    browserWindows.push(browserWindow);
+    // Store in map by alias, or as 'home' if no alias
+    if (alias) {
+        browserWindows[alias] = browserWindow;
+    } else {
+        browserWindows.home = browserWindow;
+    }
     exports.browserWindows = browserWindows;
     return browserWindow;
 };
 
+// Helper to get a window by alias
+exports.getWindowByAlias = (alias) => {
+    return browserWindows[alias] || null;
+};
+
+// Helper to get the home window
+exports.getHomeWindow = () => {
+    return browserWindows.home;
+};
+
 exports.getBaseUrl = (isDev) => {
     return isDev ? 'http://localhost:3000' : 'https://sf-toolkit.com';
-}
+};
 
 exports.createMainWindow = ({ isDev, url }) => {
     let browserWindow = createWindow({ url });
-        browserWindow.loadURL(`${exports.getBaseUrl(isDev)}/app`);
+    browserWindow.loadURL(`${exports.getBaseUrl(isDev)}/app`);
     return browserWindow;
 };
 
-exports.createInstanceWindow = ({ isDev, alias, username,sessionId,serverUrl }) => {
+exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }) => {
     console.log(`Creating Instance window`);
-    let browserWindow = createWindow({});
+    let browserWindow = createWindow({ alias });
     const baseUrl = exports.getBaseUrl(isDev);
 
-    if(sessionId && serverUrl){
+    if (serverUrl && sessionId) {
+        // TODO: check if sessionId can be removed and use accessToken only
         browserWindow.loadURL(`${baseUrl}/extension?sessionId=${sessionId}&serverUrl=${serverUrl}`);
-    }else{
+    } else {
         browserWindow.loadURL(`${baseUrl}/extension?alias=${encodeURIComponent(alias)}`);
     }
 

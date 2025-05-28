@@ -2,9 +2,11 @@
 require('fix-path')();
 
 const { app, nativeImage } = require('electron');
-const { browserWindows, createMainWindow, createInstanceWindow } = require('./libs/window.js');
+const { browserWindows, createMainWindow, createInstanceWindow, getWindowByAlias } = require('./libs/window.js');
 const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
+const path = require('path');
+const { startMCPServer } = require('./mcp/server');
 
 /** Menu **/
 //require('./utils/menu.js');
@@ -31,19 +33,35 @@ try {
     enableEventListeners(require('./libs/modules/org.js'), 'org', ipcMainManager);
     enableEventListeners(require('./libs/modules/util.js'), 'util', ipcMainManager);
 
-    ipcMainManager.handle('OPEN_INSTANCE', (_, { alias, username,serverUrl,sessionId }) => {
+    ipcMainManager.handle('OPEN_INSTANCE', (_, { alias, username, serverUrl, sessionId }) => {
         createInstanceWindow({
-            parent: browserWindows[0],
+            parent: getWindowByAlias(alias || username),
             isDev,
             alias,
             username,
             serverUrl,
-            sessionId
+            sessionId,
         });
     });
 } catch (e) {
     console.error('Issue in IPC Manager', e);
 }
+
+// Register protocol handler (macOS)
+if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+        app.setAsDefaultProtocolClient('sf-toolkit', process.execPath, [path.resolve(process.argv[1])]);
+    }
+} else {
+    app.setAsDefaultProtocolClient('sf-toolkit');
+}
+
+// Handle protocol URLs (macOS)
+app.on('open-url', (event, url) => {
+    event.preventDefault();
+    console.log('App opened with URL:', url);
+    // TODO: Add your logic here (e.g., send to renderer)
+});
 
 /** Execute **/
 app.whenReady().then(async () => {
@@ -51,7 +69,16 @@ app.whenReady().then(async () => {
     app.dock.setIcon(nativeImage.createFromPath(app.getAppPath() + '/public/sfdx_gui.png'));
 
     // Main Window
-    createMainWindow({ isDev });
+    const mainWindow = createMainWindow({ isDev });
+    // Set the home window in the browserWindows map
+    browserWindows.home = mainWindow;
+
+    // Start MCP server, pass mainWindow
+    /* startMCPServer({
+        mainWindow,
+        isDev,
+        ipcMainManager,
+    }); */
 });
 
 app.on('window-all-closed', () => {

@@ -29,9 +29,9 @@ Or, to build and make a distributable package (macOS example):
 ## Publishing a Release
 
 1. Run a dry run to verify the publish process:
-   - `npm run publish:dry`
+    - `npm run publish:dry`
 2. If the dry run succeeds, publish the release:
-   - `npm run publish:run`
+    - `npm run publish:run`
 
 ## Formatting
 

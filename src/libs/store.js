@@ -44,7 +44,7 @@ function parseDataFile(filePath, defaults) {
     try {
         return JSON.parse(fs.readFileSync(filePath));
     } catch (error) {
-        console.warn('Failed to read or parse store file, using defaults:', error);
+        //console.warn('Failed to read or parse store file, using defaults:', error);
         return defaults;
     }
 }
