@@ -7,10 +7,11 @@ const { isInitializeRequest } = require('@modelcontextprotocol/sdk/types.js');
 const { z } = require('zod');
 const globalHandler = require('./handlers/global');
 const orgHandler = require('./handlers/org');
-const queryHandler = require('./handlers/query');
+const applicationSOQLHandler = require('./handlers/application_SOQL');
 const restapiHandler = require('./handlers/restapi');
 const documentationHandler = require('./handlers/documentation');
 const navigationHandler = require('./handlers/navigation');
+const jsforceMcpHandler = require('./handlers/jsforceMcp');
 
 function getServer({ mainWindow, isDev, ipcMainManager }) {
     const server = new McpServer({
@@ -20,10 +21,11 @@ function getServer({ mainWindow, isDev, ipcMainManager }) {
     const context = { mainWindow, isDev, ipcMainManager };
     globalHandler.register(server, context);
     orgHandler.register(server, context);
-    queryHandler.register(server, context);
-    restapiHandler.register(server, context);
-    documentationHandler.register(server, context);
-    navigationHandler.register(server, context);
+    applicationSOQLHandler.register(server, context);
+    //restapiHandler.register(server, context);
+    //documentationHandler.register(server, context);
+    //navigationHandler.register(server, context);
+    jsforceMcpHandler.register(server, context);
     return server;
 }
 

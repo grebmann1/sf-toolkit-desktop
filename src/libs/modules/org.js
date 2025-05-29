@@ -107,6 +107,19 @@ getAllOrgs = async (_) => {
 
 seeDetails = async (_, { alias }) => {
     console.log('seeDetails');
+    // First, check if the org exists in the store
+    if (orgsStore.contains(alias)) {
+        const org = orgsStore.get(alias);
+        // Try to provide a similar structure as the sfdx result
+        const res = {
+            ...org,
+            loginUrl: org.loginUrl || org.instanceUrl || org.instanceurl || '',
+            orgId: org.orgId || org.organizationId || org.org_id || '',
+            credentialType: org.credentialType || 'USERNAME',
+        };
+        return { res };
+    }
+    // Fallback to sfdx if not in store
     return new Promise((resolve, reject) => {
         Promise.all([
             sfdx.force.org.display({

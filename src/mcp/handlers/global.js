@@ -1,5 +1,6 @@
-const { createInstanceWindow, browserWindows } = require('../../libs/window.js');
+const { createInstanceWindow, browserWindows, getHomeWindow } = require('../../libs/window.js');
 const { z } = require('zod');
+const { ResourceTemplate } = require('@modelcontextprotocol/sdk/server/mcp.js');
 
 function register(server, context) {
     /* server.prompt(
@@ -35,21 +36,88 @@ function register(server, context) {
         ],
     })); */
 
+
+
     server.tool(
-        'global.openSfToolkit',
-        `Open SF Toolkit with the given org`,
-        {
-            alias: z.string().describe('Alias of the org'),},
+        "global.listOfWindows",
+        "Get list of opened windows",
+        {},
         async (params, _ctx) => {
-            // Send IPC message to frontend to trigger toolkitOpening
-            if (context && context.ipcMainManager && context.mainWindow && context.mainWindow.webContents) {
-                context.ipcMainManager.send('toolkitOpening', [params.alias], context.mainWindow.webContents);
-            }
             return {
                 content: [
                     {
                         type: 'text',
-                        text: 'sf-toolkit opened (stub)',
+                        text: `
+                            List of windows:
+                            ${Object.keys(browserWindows).map(key => `- ${key}`).join('\n')}
+                        `,
+                    },
+                ],
+            };
+        },
+    );
+
+
+    server.tool(
+        'global.openSfToolkit',
+        `Open SF Toolkit with a specific org alias`,
+        {
+            alias: z.string().describe('Alias of the org'),
+        },
+        async (params, _ctx) => {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `
+                            1. Fetch the list of orgs using the Org.getListOfOrgs tool.
+                            2. Find the org that matches the desired alias.
+                            3. Check the window is already open for the alias by calling the global.listOfWindows tool.
+                                - If the window is already open, then return the status as Success and move to the next step.
+                                - Otherwise, open the Salesforce Toolkit for that org by calling the internal.openSfToolkit tool with the org's alias and username.
+                                    - Only provide the alias and username parameters.
+                                    - Do not include serverUrl or sessionId when using the alias.
+                        `,
+                    },
+                ],
+            };
+        },
+    );
+
+    server.tool(
+        'internal.openSfToolkit',
+        {
+            alias: z.string().describe('Alias of the org'),
+            username: z.string().describe('Username of the org').optional(),
+            serverUrl: z.string().describe('Server url of the org').optional(),
+            sessionId: z.string().describe('Session id of the org').optional(),
+        },
+        async (params, _ctx) => {
+            // Send IPC message to frontend to trigger toolkitOpening
+            if(browserWindows[params.alias]){
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Status : Success',
+                        },
+                    ],
+                };
+            }
+
+            createInstanceWindow({
+                parent: getHomeWindow(),
+                isDev: context.isDev,
+                alias: params.alias,
+                username: params.username,
+                serverUrl: params.serverUrl,
+                sessionId: params.sessionId,
+            });
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: 'Status : Success',
                     },
                 ],
             };
@@ -58,3 +126,17 @@ function register(server, context) {
 }
 
 module.exports = { register };
+
+
+/* - If the credentialType is USERNAME, then do the following:
+1. Call the Org.generateAccessToken tool to generate the access token
+2. Use the following parameters to call the internal.openSfToolkit tool:
+    - alias: the alias of the org
+    - username: the username of the org
+    - serverUrl: the instance url of the org
+    - sessionId: the newly generated access token
+- Otherwise do the following:
+1. Use the following parameters to call the internal.openSfToolkit tool:
+    - alias: the alias of the org
+    - serverUrl: the instance url of the org
+    - sessionId: the session id of the org */

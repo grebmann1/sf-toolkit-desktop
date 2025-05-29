@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 /** Fix Path **/
 require('fix-path')();
 
@@ -74,11 +76,11 @@ app.whenReady().then(async () => {
     browserWindows.home = mainWindow;
 
     // Start MCP server, pass mainWindow
-    /* startMCPServer({
+    startMCPServer({
         mainWindow,
         isDev,
-        ipcMainManager,
-    }); */
+        ipcMainManager
+    });
 });
 
 app.on('window-all-closed', () => {

@@ -1,6 +1,7 @@
 const { BrowserWindow, shell } = require('electron');
 const path = require('path');
 const Store = require('./store.js');
+const { ipcMainManager } = require('./ipc.js');
 
 const store = new Store({
     configName: 'app-settings',
@@ -56,8 +57,7 @@ const createWindow = ({ parent, alwaysOnTop, alias }) => {
     });
 
     browserWindow.on('closed', () => {
-        browserWindows = browserWindows.filter((bw) => browserWindow !== bw);
-        exports.browserWindows = browserWindows;
+        delete browserWindows[alias];
         browserWindow = null;
     });
 
@@ -71,6 +71,10 @@ const createWindow = ({ parent, alwaysOnTop, alias }) => {
         console.log('will-navigate', event, url);
         event.preventDefault();
         shell.openExternal(url);
+    });
+
+    browserWindow.webContents.once('dom-ready', () => {
+        ipcMainManager.markWebContentsReady(browserWindow.webContents);
     });
     // Store in map by alias, or as 'home' if no alias
     if (alias) {
@@ -93,7 +97,8 @@ exports.getHomeWindow = () => {
 };
 
 exports.getBaseUrl = (isDev) => {
-    return isDev ? 'http://localhost:3000' : 'https://sf-toolkit.com';
+    return isDev ? process.env.DEV_URL : process.env.PROD_URL;
+    //return isDev ? 'http://localhost:3000' : 'https://sf-toolkit.com';
 };
 
 exports.createMainWindow = ({ isDev, url }) => {
@@ -107,11 +112,10 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
     let browserWindow = createWindow({ alias });
     const baseUrl = exports.getBaseUrl(isDev);
 
-    if (serverUrl && sessionId) {
-        // TODO: check if sessionId can be removed and use accessToken only
-        browserWindow.loadURL(`${baseUrl}/extension?sessionId=${sessionId}&serverUrl=${serverUrl}`);
-    } else {
+    if (alias) {
         browserWindow.loadURL(`${baseUrl}/extension?alias=${encodeURIComponent(alias)}`);
+    } else {
+        browserWindow.loadURL(`${baseUrl}/extension?sessionId=${sessionId}&serverUrl=${serverUrl}`);
     }
 
     browserWindow.webContents.once('dom-ready', () => {

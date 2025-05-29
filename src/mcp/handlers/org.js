@@ -1,10 +1,26 @@
 const { getAllOrgs } = require('../../libs/modules/org');
 const { z } = require('zod');
+const { isNotUndefinedOrNull, isEmpty } = require('../../utils/utils');
+const jsforce = require('jsforce');
 
 function register(server, context) {
     server.tool('Org.getListOfOrgs', `Get list of orgs`, async (params) => {
         // TODO: Implement logic to get list of orgs
-        const orgs = await getAllOrgs();
+        const {sfdxOrgs,storedOrgs} = await getAllOrgs();
+        let orgs = [].concat(
+            sfdxOrgs.result.nonScratchOrgs.map(x => ({
+                ...x,
+                credentialType: 'OAUTH',
+            })),
+            sfdxOrgs.result.scratchOrgs.map(x => ({
+                ...x,
+                credentialType: 'OAUTH',
+            })),
+            storedOrgs.map(x => ({
+                ...x,
+                credentialType: x.credentialType || 'USERNAME',
+            }))
+        );
         return {
             content: [
                 {
@@ -14,26 +30,81 @@ function register(server, context) {
             ],
         };
     });
-    /* server.tool(
-        'Org.generateAccessToken',
-        `Generate access token for the given org`,
+    server.tool(
+        'Org.getSessionIdAndServerUrl',
+        `Fetch sessionId and serverUrl for a given org or alias`,
         {
             alias: z.string().describe('Alias of the org'),
         },
         async (params) => {
-            console.log('Org.generateAccessToken', params);
-            // TODO: Implement logic to generate access token for specific org
-            const token = '1234567890';
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: JSON.stringify(token),
-                    },
-                ],
-            };
+            try{
+                console.log('Org.generateAccessToken', params);
+                const {sfdxOrgs,storedOrgs} = await getAllOrgs();
+                let orgs = [].concat(
+                    sfdxOrgs.result.nonScratchOrgs,
+                    sfdxOrgs.result.scratchOrgs,
+                    storedOrgs
+                );
+                orgs = orgs.filter(x => isNotUndefinedOrNull(x.alias));
+                const selectedOrg = orgs.find(x => x.alias === params.alias);
+                console.log('selectedOrg', selectedOrg);
+                let sessionId,serverUrl;
+                if(selectedOrg.credentialType === 'USERNAME'){
+                    process.env.NODE_DEBUG = 'http';
+
+                    // Username/Password stored in the store
+                    const connection = new jsforce.Connection({
+                        loginUrl : isEmpty(selectedOrg.instanceUrl) ? selectedOrg.loginUrl : selectedOrg.instanceUrl,
+                        version: '60.0' // to be changed later
+                    });
+                    console.log('connectio -->', {
+                        loginUrl:connection.loginUrl,
+                        username:selectedOrg.username,
+                        password:selectedOrg.password
+                    });
+                      
+                    const userInfo = await connection.login(selectedOrg.username, selectedOrg.password);
+                    console.log('userInfo -->', userInfo);
+
+                    console.log('[Username/Password] connection', {
+                        sessionId:connection.accessToken,
+                        serverUrl:connection.instanceUrl
+                    });
+                    sessionId = connection.accessToken;
+                    serverUrl = connection.instanceUrl;
+                }else{
+                    // Coming from SFDX !!!
+                    console.log('[OAUTH] connection', {
+                        sessionId:selectedOrg.accessToken,
+                        serverUrl:selectedOrg.instanceUrl
+                    });
+                    sessionId = selectedOrg.accessToken;
+                    serverUrl = selectedOrg.instanceUrl;
+                }
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify({sessionId,serverUrl}),
+                        },
+                    ],
+                };
+            }catch(e){
+                console.log('error -->', e);
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify({
+                                success: false,
+                                error: e.message || e.toString()
+                            }),
+                        },
+                    ],
+                };
+            }
         },
-    ); */
+    );
 }
 
 module.exports = { register };

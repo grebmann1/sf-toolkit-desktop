@@ -14,13 +14,15 @@
         "publish:run": "npm install --silent; electron-forge publish --from-dry-run",
         "start:dev:electron": "NODE_ENV=development electron .",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "replace:jsforce": "node scripts/replace-jsforce-connection.js"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.12.0",
         "@reduxjs/toolkit": "^2.0.1",
         "command-exists": "^1.2.9",
         "fix-path": "3.0.0",
+        "jsforce": "3.8.2",
         "jszip": "^3.10.1",
         "moment": "^2.30.1",
         "prettier": "^3.5.3",

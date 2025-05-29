@@ -20,4 +20,12 @@ function runActionAfterTimeOut(value, action, { timeout = 300 } = {}) {
     return buffer._clearBufferId;
 }
 
-module.exports = { hashCode, runActionAfterTimeOut };
+const isNotUndefinedOrNull = (value) => {   
+    return value !== undefined && value !== null;
+};
+
+const isEmpty = (value) => {
+    return value === undefined || value === null || value === '';
+};
+
+module.exports = { hashCode, runActionAfterTimeOut, isNotUndefinedOrNull, isEmpty };
