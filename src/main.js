@@ -9,6 +9,7 @@ const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
 const path = require('path');
 const { startMCPServer } = require('./mcp/server');
+const Store = require('./libs/store.js');
 
 /** Menu **/
 //require('./utils/menu.js');
@@ -28,6 +29,13 @@ if (isDev) {
     updateElectronApp(); // additional configuration options available
 }
 /** Store **/
+
+const store = new Store({
+    configName: 'app-settings',
+    defaults: {
+        mcpPort: 12346,
+    },
+});
 
 /** IPC Manager **/
 try {
@@ -79,7 +87,8 @@ app.whenReady().then(async () => {
     startMCPServer({
         mainWindow,
         isDev,
-        ipcMainManager
+        ipcMainManager,
+        port: store.get('mcpPort')
     });
 });
 

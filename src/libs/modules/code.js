@@ -272,7 +272,6 @@ _retrieveCodeWorker = ({ alias, configName, targetPath, manifestPath, webContent
     // Kill child process in case it's too long
     const timeout = setTimeout(() => {
         if (workers[workerKey]) {
-            console.log(workers[workerKey]);
             workers[workerKey].kill();
         }
     }, 60000 * 2);
@@ -313,12 +312,10 @@ _retrieveCodeWorker = ({ alias, configName, targetPath, manifestPath, webContent
 };
 
 _scanCodeWorker = ({ alias, targetPath, webContents, listenerName, command }) => {
-    console.log('launch _scanCodeWorker');
     let workerKey = `scanner-${alias}`;
     // Kill child process in case it's too long
     const timeout = setTimeout(() => {
         if (workers[workerKey]) {
-            console.log(workers[workerKey]);
             workers[workerKey].kill();
         }
     }, 60000 * 2);
@@ -327,13 +324,11 @@ _scanCodeWorker = ({ alias, targetPath, webContents, listenerName, command }) =>
     workers[workerKey] = utilityProcess.fork(path.join(__dirname, '../../workers/scanner.js'), [], { cwd: targetPath });
     workers[workerKey].postMessage({ params: { alias, command } });
     workers[workerKey].once('exit', () => {
-        console.log('worker exit');
         clearTimeout(timeout);
         webContents.send(listenerName, { type: 'codeScanner', action: 'exit' });
         workers[workerKey] = null;
     });
     workers[workerKey].once('message', async (value) => {
-        console.log('worker message', value);
         const { res, error } = value;
         if (res) {
             webContents.send(listenerName, {
@@ -354,17 +349,14 @@ _scanCodeWorker = ({ alias, targetPath, webContents, listenerName, command }) =>
 };
 
 _runShell = ({ alias, targetPath, webContents, listenerName, command }) => {
-    console.log('launch _runShell');
     let workerKey = `shell-${alias}`;
     // Kill child process in case it's too long
     const timeout = setTimeout(() => {
         if (workers[workerKey]) {
-            //console.log(workers[workerKey])
             workers[workerKey].kill();
         }
     }, 60000 * 2);
     if (workers[workerKey]) {
-        // throw new Error('Existing instance already processing');
         workers[workerKey].kill(); // for now i kill the existing one
     }
 
@@ -372,19 +364,16 @@ _runShell = ({ alias, targetPath, webContents, listenerName, command }) => {
 
     // Handle standard output data
     workers[workerKey].stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
         webContents.send(listenerName, formatResponse({ action: 'message', data }));
     });
 
     // Handle standard error data
     workers[workerKey].stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
         webContents.send(listenerName, formatResponse({ action: 'error', data }));
     });
 
     // Handle on close
     workers[workerKey].on('close', (code) => {
-        console.log(`Child process exited with code ${code}`);
         webContents.send(listenerName, formatResponse({ action: 'exit', data: '' }));
     });
 };

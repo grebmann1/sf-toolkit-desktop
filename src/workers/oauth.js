@@ -2,7 +2,6 @@ const sfdx = require('sfdx-node');
 const { encodeError } = require('../utils/errors.js');
 
 createNewOrgAlias = async ({ alias, instanceurl }) => {
-    console.log('createNewOrgAlias - start');
     try {
         let res = await sfdx.auth.web.login({
             setalias: alias,

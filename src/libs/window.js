@@ -1,12 +1,13 @@
-const { BrowserWindow, shell } = require('electron');
+const { BrowserWindow, shell,ipcMain } = require('electron');
 const path = require('path');
 const Store = require('./store.js');
 const { ipcMainManager } = require('./ipc.js');
 
+
 const store = new Store({
     configName: 'app-settings',
     defaults: {
-        windowBounds: { width: 800, height: 600 },
+        windowBounds: { width: 800, height: 600 }
     },
 });
 
@@ -62,13 +63,11 @@ const createWindow = ({ parent, alwaysOnTop, alias }) => {
     });
 
     browserWindow.webContents.on('new-window', (event, url) => {
-        console.log('new-window', event, url);
         event.preventDefault();
         shell.openExternal(url);
     });
 
     browserWindow.webContents.on('will-navigate', (event, url) => {
-        console.log('will-navigate', event, url);
         event.preventDefault();
         shell.openExternal(url);
     });
@@ -107,7 +106,8 @@ exports.createMainWindow = ({ isDev, url }) => {
     return browserWindow;
 };
 
-exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }) => {
+exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }, callback) => {
+    
     console.log(`Creating Instance window`);
     let browserWindow = createWindow({ alias });
     const baseUrl = exports.getBaseUrl(isDev);
@@ -119,7 +119,34 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
     }
 
     browserWindow.webContents.once('dom-ready', () => {
-        browserWindow.setTitle(`${alias}:${username}`);
+        let title = alias;     
+        if (username) {
+            title = `${title}:${username}`;
+        }
+        browserWindow.setTitle(title);
     });
+
+    // Send the channel name to the renderer after did-finish-load
+    browserWindow.webContents.on('did-finish-load', () => {
+        // Unique channel for this window    
+        ipcMainManager.send('set-ready-channel',null, browserWindow.webContents)
+        .then((result) => {
+            if(callback){
+                callback({result});
+            }
+            // Fake Loading for testing !!!
+            fakeCall();
+        })
+        .catch((error) => {
+            callback({error});
+        });
+
+        
+    });
+
+    async function fakeCall() {
+        const result = await ipcMainManager.send('electron-soql-call', { "query": "SELECT Id, Name FROM Account","alias": "default-toolkit"}, browserWindow.webContents);
+    }
+
     return browserWindow;
 };

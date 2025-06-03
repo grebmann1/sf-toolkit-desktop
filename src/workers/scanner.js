@@ -4,14 +4,11 @@ const { exec } = require('child_process');
 const { encodeError } = require('../utils/errors.js');
 
 scanner = async ({ alias, command }) => {
-    console.log('scanner - start', alias);
     try {
-        console.log('command', command);
         const childProcess = exec(command);
 
         // Handle standard output data
         childProcess.stdout.on('data', (data) => {
-            console.log(`stdout: ${data}`);
         });
 
         // Handle standard error data
@@ -21,7 +18,6 @@ scanner = async ({ alias, command }) => {
 
         // Handle on close
         childProcess.on('close', (code) => {
-            console.log(`Child process exited with code ${code}`);
             const res = {
                 status: 'finished',
                 code,
@@ -41,7 +37,6 @@ scanner = async ({ alias, command }) => {
 
 // Child process
 process.parentPort.once('message', async (e) => {
-    console.log('scanner - message');
     const { params } = e.data;
     scanner(params);
 });

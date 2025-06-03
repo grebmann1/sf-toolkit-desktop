@@ -3,13 +3,14 @@ const express = require('express');
 const { randomUUID } = require('crypto');
 const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
 const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
-const { isInitializeRequest } = require('@modelcontextprotocol/sdk/types.js');
-const { z } = require('zod');
+//const { z } = require('zod');
+// Applications
+const applicationSOQLHandler = require('./handlers/applications/soql');
+//const restapiHandler = require('./handlers/applications/restapi');
+// Others
 const globalHandler = require('./handlers/global');
 const orgHandler = require('./handlers/org');
-const applicationSOQLHandler = require('./handlers/application_SOQL');
-const restapiHandler = require('./handlers/restapi');
-const documentationHandler = require('./handlers/documentation');
+//const documentationHandler = require('./handlers/documentation');
 const navigationHandler = require('./handlers/navigation');
 const jsforceMcpHandler = require('./handlers/jsforceMcp');
 
@@ -24,12 +25,12 @@ function getServer({ mainWindow, isDev, ipcMainManager }) {
     applicationSOQLHandler.register(server, context);
     //restapiHandler.register(server, context);
     //documentationHandler.register(server, context);
-    //navigationHandler.register(server, context);
+    navigationHandler.register(server, context);
     jsforceMcpHandler.register(server, context);
     return server;
 }
 
-function startMCPServer({ mainWindow, isDev, ipcMainManager }) {
+function startMCPServer({ mainWindow, isDev, ipcMainManager, port }) {
     const app = express();
     app.use(express.json());
 
@@ -62,7 +63,7 @@ function startMCPServer({ mainWindow, isDev, ipcMainManager }) {
     });
 
     app.get('/mcp', async (req, res) => {
-        console.log('Received GET MCP request');
+        //console.log('Received GET MCP request');
         res.writeHead(405).end(
             JSON.stringify({
                 jsonrpc: '2.0',
@@ -76,7 +77,7 @@ function startMCPServer({ mainWindow, isDev, ipcMainManager }) {
     });
 
     app.delete('/mcp', async (req, res) => {
-        console.log('Received DELETE MCP request');
+        //console.log('Received DELETE MCP request');
         res.writeHead(405).end(
             JSON.stringify({
                 jsonrpc: '2.0',
@@ -89,8 +90,10 @@ function startMCPServer({ mainWindow, isDev, ipcMainManager }) {
         );
     });
 
-    app.listen(12346, () => {
-        console.log('MCP Stateless Streamable HTTP Server listening on port 12346');
+    const listenPort = port || 12346;
+    app.listen(listenPort, () => {
+        // Keep this log for diagnostics
+        console.log(`MCP Stateless Streamable HTTP Server listening on port ${listenPort}`);
     });
 }
 

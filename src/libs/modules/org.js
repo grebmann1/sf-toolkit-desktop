@@ -45,7 +45,6 @@ _handleOAuthInWorker = ({ alias, instanceurl, webContents }) => {
 /** Methods **/
 
 killOauth = async (_) => {
-    console.log('killOauth');
     const workerKey = 'oauth';
     try {
         if (workers[workerKey]) {
@@ -77,7 +76,6 @@ getStoredOrgs = async () => {
 
 // Update getAllOrgs to return both SFDX and stored orgs
 getAllOrgs = async (_) => {
-    console.log('getAllOrgs');
     const command = 'sfdx force:org:list --json --verbose';
     return new Promise((resolve, reject) => {
         exec(command, async (error, stdout, stderr) => {
@@ -93,10 +91,6 @@ getAllOrgs = async (_) => {
             }
             // Fetch stored orgs
             const stored = await getStoredOrgs();
-            console.log('getAllOrgs', {
-                sfdxOrgs,
-                storedOrgs: stored.res || [],
-            });
             resolve({
                 sfdxOrgs,
                 storedOrgs: stored.res || [],
@@ -106,7 +100,6 @@ getAllOrgs = async (_) => {
 };
 
 seeDetails = async (_, { alias }) => {
-    console.log('seeDetails');
     // First, check if the org exists in the store
     if (orgsStore.contains(alias)) {
         const org = orgsStore.get(alias);
@@ -178,9 +171,7 @@ createNewOrgAlias = async (event, { alias, instanceurl }) => {
 };
 
 unsetAlias = async (_, { alias }) => {
-    console.log('unsetAlias', alias);
     try {
-        console.log('unsetAlias', orgsStore);
         // Remove from orgsStore if present
         if (orgsStore.contains(alias)) {
             delete orgsStore.data[alias];

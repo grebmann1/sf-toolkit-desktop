@@ -38,7 +38,6 @@ function register(server, context) {
         },
         async (params) => {
             try{
-                console.log('Org.generateAccessToken', params);
                 const {sfdxOrgs,storedOrgs} = await getAllOrgs();
                 let orgs = [].concat(
                     sfdxOrgs.result.nonScratchOrgs,
@@ -47,7 +46,6 @@ function register(server, context) {
                 );
                 orgs = orgs.filter(x => isNotUndefinedOrNull(x.alias));
                 const selectedOrg = orgs.find(x => x.alias === params.alias);
-                console.log('selectedOrg', selectedOrg);
                 let sessionId,serverUrl;
                 if(selectedOrg.credentialType === 'USERNAME'){
                     process.env.NODE_DEBUG = 'http';
@@ -57,27 +55,12 @@ function register(server, context) {
                         loginUrl : isEmpty(selectedOrg.instanceUrl) ? selectedOrg.loginUrl : selectedOrg.instanceUrl,
                         version: '60.0' // to be changed later
                     });
-                    console.log('connectio -->', {
-                        loginUrl:connection.loginUrl,
-                        username:selectedOrg.username,
-                        password:selectedOrg.password
-                    });
                       
                     const userInfo = await connection.login(selectedOrg.username, selectedOrg.password);
-                    console.log('userInfo -->', userInfo);
-
-                    console.log('[Username/Password] connection', {
-                        sessionId:connection.accessToken,
-                        serverUrl:connection.instanceUrl
-                    });
                     sessionId = connection.accessToken;
                     serverUrl = connection.instanceUrl;
                 }else{
                     // Coming from SFDX !!!
-                    console.log('[OAUTH] connection', {
-                        sessionId:selectedOrg.accessToken,
-                        serverUrl:selectedOrg.instanceUrl
-                    });
                     sessionId = selectedOrg.accessToken;
                     serverUrl = selectedOrg.instanceUrl;
                 }
@@ -90,7 +73,6 @@ function register(server, context) {
                     ],
                 };
             }catch(e){
-                console.log('error -->', e);
                 return {
                     content: [
                         {

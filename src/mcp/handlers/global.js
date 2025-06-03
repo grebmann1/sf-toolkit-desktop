@@ -1,6 +1,7 @@
 const { createInstanceWindow, browserWindows, getHomeWindow } = require('../../libs/window.js');
 const { z } = require('zod');
 const { ResourceTemplate } = require('@modelcontextprotocol/sdk/server/mcp.js');
+const { promiseWithTimeout } = require('../../utils/utils.js');
 
 function register(server, context) {
     /* server.prompt(
@@ -89,8 +90,8 @@ function register(server, context) {
         {
             alias: z.string().describe('Alias of the org'),
             username: z.string().describe('Username of the org').optional(),
-            serverUrl: z.string().describe('Server url of the org').optional(),
-            sessionId: z.string().describe('Session id of the org').optional(),
+            //serverUrl: z.string().describe('Server url of the org').optional(),
+            //sessionId: z.string().describe('Session id of the org').optional(),
         },
         async (params, _ctx) => {
             // Send IPC message to frontend to trigger toolkitOpening
@@ -104,15 +105,35 @@ function register(server, context) {
                     ],
                 };
             }
+            
+            try {
+                await new Promise((resolve,reject) => {
+                    createInstanceWindow({
+                        parent: getHomeWindow(),
+                        isDev: context.isDev,
+                        alias: params.alias,
+                        username: params.username,
+                        serverUrl: params.serverUrl,
+                        sessionId: params.sessionId,
+                    }, ({result,error}) => {
+                        if(result){
+                            resolve(result);
+                        } else {
+                            reject(error);
+                        }
+                    });
+                })
+            } catch (err) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Error: ' + err.message,
+                        },
+                    ],
+                };
+            }
 
-            createInstanceWindow({
-                parent: getHomeWindow(),
-                isDev: context.isDev,
-                alias: params.alias,
-                username: params.username,
-                serverUrl: params.serverUrl,
-                sessionId: params.sessionId,
-            });
             return {
                 content: [
                     {

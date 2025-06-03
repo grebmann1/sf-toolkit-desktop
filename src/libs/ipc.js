@@ -1,6 +1,6 @@
 const { ipcMain } = require('electron');
 const { EventEmitter } = require('events');
-
+const { guid, promiseWithTimeout } = require('../utils/utils.js');
 class IpcMainManager extends EventEmitter {
     constructor() {
         super();
@@ -10,15 +10,34 @@ class IpcMainManager extends EventEmitter {
 
     send(channel, args, target) {
         const _target = target;
-        const _args = Array.isArray(args) ? args : [args];
+        let attributes = args == null ? {} : (Array.isArray(args) ? args[0] : args);
 
-        if (!this.readyWebContents.has(_target)) {
-            const existing = this.messageQueue.get(_target) || [];
-            this.messageQueue.set(_target, [...existing, [channel, _args]]);
-            return;
-        }
-        console.log('Sending message to window', _target);
-        _target.send(channel, ..._args);
+        let responseChannel = `${channel}-response-${guid()}`;
+
+        return new Promise((resolve, reject) => {
+            ipcMain.once(responseChannel, (event, ...responseArgs) => resolve(...responseArgs));
+
+            if (!this.readyWebContents.has(_target)) {
+                const existing = this.messageQueue.get(_target) || [];
+                this.messageQueue.set(_target, [...existing, [channel, [attributes,responseChannel]]]);
+                return;
+            }
+            _target.send(channel, [attributes,responseChannel]);
+            // Use promiseWithTimeout to reject if not resolved in time
+            promiseWithTimeout(
+                new Promise((resolve2) => {
+                    ipcMain.once(responseChannel, (event, ...responseArgs) => resolve2(...responseArgs));
+                }),
+                90000, // 90 seconds timeout (in case it's a long running query)
+                'Timeout: No response from client.'
+            ).then((...args) => {
+                //ipcMain.removeListener(responseChannel, handler);
+                resolve(...args);
+            }).catch((err) => {
+                //ipcMain.removeListener(responseChannel, handler);
+                reject(err);
+            });
+        });
     }
 
     // Call this when the window's webContents is ready (e.g., on 'dom-ready')
