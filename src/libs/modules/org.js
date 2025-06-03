@@ -3,9 +3,11 @@ const path = require('path');
 const { app, shell, utilityProcess } = require('electron');
 const { exec, execSync } = require('child_process');
 const { encodeError } = require('../../utils/errors.js');
+const Store = require('../store.js');
 
 /** Worker Processing **/
 const workers = {};
+const orgsStore = new Store({ configName: 'orgs', defaults: {} });
 
 _handleOAuthInWorker = ({ alias, instanceurl, webContents }) => {
     // Kill child process in case it's too long
@@ -43,7 +45,6 @@ _handleOAuthInWorker = ({ alias, instanceurl, webContents }) => {
 /** Methods **/
 
 killOauth = async (_) => {
-    console.log('killOauth');
     const workerKey = 'oauth';
     try {
         if (workers[workerKey]) {
@@ -55,22 +56,63 @@ killOauth = async (_) => {
     }
 };
 
+saveOrgInfo = async (_, { alias, configuration }) => {
+    try {
+        orgsStore.set(alias, configuration);
+        return { res: 'success' };
+    } catch (e) {
+        return { error: encodeError(e) };
+    }
+};
+
+getStoredOrgs = async () => {
+    try {
+        const data = orgsStore.data || {};
+        return { res: Object.values(data) };
+    } catch (e) {
+        return { error: encodeError(e) };
+    }
+};
+
+// Update getAllOrgs to return both SFDX and stored orgs
 getAllOrgs = async (_) => {
-    console.log('getAllOrgs');
     const command = 'sfdx force:org:list --json --verbose';
     return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
+        exec(command, async (error, stdout, stderr) => {
+            let sfdxOrgs = null;
             if (error) {
-                resolve({ error: encodeError(error) });
+                sfdxOrgs = { error: encodeError(error) };
             } else {
-                resolve(JSON.parse(stdout.toString()));
+                try {
+                    sfdxOrgs = JSON.parse(stdout.toString());
+                } catch (e) {
+                    sfdxOrgs = { error: encodeError(e) };
+                }
             }
+            // Fetch stored orgs
+            const stored = await getStoredOrgs();
+            resolve({
+                sfdxOrgs,
+                storedOrgs: stored.res || [],
+            });
         });
     });
 };
 
 seeDetails = async (_, { alias }) => {
-    console.log('seeDetails');
+    // First, check if the org exists in the store
+    if (orgsStore.contains(alias)) {
+        const org = orgsStore.get(alias);
+        // Try to provide a similar structure as the sfdx result
+        const res = {
+            ...org,
+            loginUrl: org.loginUrl || org.instanceUrl || org.instanceurl || '',
+            orgId: org.orgId || org.organizationId || org.org_id || '',
+            credentialType: org.credentialType || 'USERNAME',
+        };
+        return { res };
+    }
+    // Fallback to sfdx if not in store
     return new Promise((resolve, reject) => {
         Promise.all([
             sfdx.force.org.display({
@@ -130,14 +172,21 @@ createNewOrgAlias = async (event, { alias, instanceurl }) => {
 
 unsetAlias = async (_, { alias }) => {
     try {
-        let res = await sfdx.alias.unset(
-            {
-                _quiet: true,
-                _rejectOnError: true,
-            },
-            { args: [`${alias}`] },
-        );
-        return { res };
+        // Remove from orgsStore if present
+        if (orgsStore.contains(alias)) {
+            delete orgsStore.data[alias];
+            orgsStore.set(null, orgsStore.data); // Save updated data
+        } else {
+            // Remove from sfdx aliases
+            await sfdx.alias.unset(
+                {
+                    _quiet: true,
+                    _rejectOnError: true,
+                },
+                { args: [`${alias}`] },
+            );
+        }
+        return null;
     } catch (e) {
         return { error: encodeError(e) };
     }
@@ -179,4 +228,6 @@ module.exports = {
     unsetAlias,
     setAlias,
     logout,
+    saveOrgInfo,
+    getStoredOrgs,
 };
