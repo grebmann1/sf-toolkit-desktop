@@ -4,7 +4,8 @@ const { getWindowByAlias } = require('../../libs/window.js');
 function register(server, context) {
     server.tool(
         'Navigation.navigate',
-        `Navigate to a specific application in the SF Toolkit`,
+        `This tool allows you to navigate to a specific application within the SF Toolkit. 
+        Ensure that the SF Toolkit is open for the specified alias before using this tool to successfully direct the navigation.`,
         {
             alias: z.string().describe('Alias of the org'),
             application: z.enum([

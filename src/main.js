@@ -1,5 +1,4 @@
-require('dotenv').config();
-
+//require('dotenv').config();
 /** Fix Path **/
 require('fix-path')();
 
@@ -17,7 +16,6 @@ const Store = require('./libs/store.js');
 /** Auto Updater **/
 const isDev = !app.isPackaged;
 console.log('---> isDev   <---', isDev);
-console.log('---> version <---', app.getVersion());
 
 /** Dev Mode  **/
 if (isDev) {

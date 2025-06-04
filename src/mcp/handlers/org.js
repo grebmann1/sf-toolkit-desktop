@@ -48,7 +48,7 @@ function register(server, context) {
                 const selectedOrg = orgs.find(x => x.alias === params.alias);
                 let sessionId,serverUrl;
                 if(selectedOrg.credentialType === 'USERNAME'){
-                    process.env.NODE_DEBUG = 'http';
+                    //process.env.NODE_DEBUG = 'http';
 
                     // Username/Password stored in the store
                     const connection = new jsforce.Connection({

@@ -1,7 +1,5 @@
 const { createInstanceWindow, browserWindows, getHomeWindow } = require('../../libs/window.js');
 const { z } = require('zod');
-const { ResourceTemplate } = require('@modelcontextprotocol/sdk/server/mcp.js');
-const { promiseWithTimeout } = require('../../utils/utils.js');
 
 function register(server, context) {
     /* server.prompt(
@@ -41,7 +39,7 @@ function register(server, context) {
 
     server.tool(
         "global.listOfWindows",
-        "Get list of opened windows",
+        "Get list of opened windows (sf-toolkit). Call this tool to check if a window is already open for the alias.",
         {},
         async (params, _ctx) => {
             return {
@@ -61,32 +59,15 @@ function register(server, context) {
 
     server.tool(
         'global.openSfToolkit',
-        `Open SF Toolkit with a specific org alias`,
-        {
-            alias: z.string().describe('Alias of the org'),
-        },
-        async (params, _ctx) => {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `
-                            1. Fetch the list of orgs using the Org.getListOfOrgs tool.
-                            2. Find the org that matches the desired alias.
-                            3. Check the window is already open for the alias by calling the global.listOfWindows tool.
-                                - If the window is already open, then return the status as Success and move to the next step.
-                                - Otherwise, open the Salesforce Toolkit for that org by calling the internal.openSfToolkit tool with the org's alias and username.
-                                    - Only provide the alias and username parameters.
-                                    - Do not include serverUrl or sessionId when using the alias.
-                        `,
-                    },
-                ],
-            };
-        },
-    );
-
-    server.tool(
-        'internal.openSfToolkit',
+        `Launch the SF Toolkit using a specified org alias.
+        Ensure the alias is valid before invoking this tool. 
+        Utilize the Org.getListOfOrgs tool to retrieve and verify the desired alias from the list of orgs.
+        Determine if a window is already open for the alias by using the global.listOfWindows tool.
+        - If a window is open, return a status of Success and proceed.
+        - If not, initiate the Salesforce Toolkit for the org by invoking the internal.openSfToolkit tool with the org's alias and username.
+            - Only the alias and username parameters should be provided.
+            - Exclude serverUrl and sessionId when using the alias.
+        `,
         {
             alias: z.string().describe('Alias of the org'),
             username: z.string().describe('Username of the org').optional(),

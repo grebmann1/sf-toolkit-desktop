@@ -1,17 +1,4 @@
-const { ipcRenderer, contextBridge } = require('electron');
-const fs = require('fs');
-const path = require('path');
-
-
-// Read app version from package.json
-let appVersion = null;
-try {
-    const packageJsonPath = path.join(__dirname, '..', 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    appVersion = packageJson.version;
-} catch (e) {
-    appVersion = null;
-}
+const { ipcRenderer, contextBridge,app } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
     invoke: (channel, args) => {
@@ -32,5 +19,5 @@ contextBridge.exposeInMainWorld('electron', {
     listener_off: (channel) => ipcRenderer.removeAllListeners(channel),
     setChannel: (channel) => this.channel = channel,
     getChannel: () => this.channel,
-    getAppVersion: () => appVersion,
+    getAppVersion: () => app.getVersion(),
 });
