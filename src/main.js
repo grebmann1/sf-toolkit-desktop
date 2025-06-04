@@ -7,8 +7,8 @@ const { browserWindows, createMainWindow, createInstanceWindow, getWindowByAlias
 const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
 const path = require('path');
-const { startMCPServer } = require('./mcp/server');
 const Store = require('./libs/store.js');
+const expressApiServer = require('./server/api');
 
 /** Menu **/
 //require('./utils/menu.js');
@@ -81,13 +81,8 @@ app.whenReady().then(async () => {
     // Set the home window in the browserWindows map
     browserWindows.home = mainWindow;
 
-    // Start MCP server, pass mainWindow
-    startMCPServer({
-        mainWindow,
-        isDev,
-        ipcMainManager,
-        port: store.get('mcpPort')
-    });
+    // Start Express REST API server for window management
+    expressApiServer; // Just require to start the server
 });
 
 app.on('window-all-closed', () => {

@@ -1,0 +1,13 @@
+[2025-06-04T21:59:49.030Z] Error: {"message":"request to http://localhost:12346/org/get-list-of-orgs failed, reason: ","type":"system","errno":"ECONNREFUSED","code":"ECONNREFUSED"}
+[2025-06-04T22:00:50.638Z] Error: {}
+[2025-06-04T22:09:35.544Z] {"error":"getHomeWindow is not defined"}
+[2025-06-04T22:10:25.135Z] {"error":"getHomeWindow is not defined"}
+[2025-06-04T22:10:44.355Z] {"error":"context is not defined"}
+[2025-06-04T22:12:40.504Z] {"status":"success"}
+[2025-06-04T22:13:11.387Z] {}
+[2025-06-04T22:14:51.717Z] {"status":"error","message":"No window found for alias: default-toolkit. Please open the SF Toolkit for the alias before calling this endpoint."}
+[2025-06-04T22:15:09.341Z] {"status":"success","message":"Navigated to documentation"}
+[2025-06-04T22:15:32.782Z] {"status":"success","message":"Displaying the query result for the alias: default-toolkit"}
+[2025-06-04T22:25:49.410Z] {"status":"success","message":"Displaying the query result for the alias: default-toolkit"}
+[2025-06-04T22:55:25.057Z] {"message":"request to http://localhost:12346/soql/display-query-in-sf-toolkit failed, reason: ","type":"system","errno":"ECONNREFUSED","code":"ECONNREFUSED"}
+[2025-06-04T22:56:32.126Z] {"message":"request to http://localhost:12346/electron/list-of-windows failed, reason: ","type":"system","errno":"ECONNREFUSED","code":"ECONNREFUSED"}

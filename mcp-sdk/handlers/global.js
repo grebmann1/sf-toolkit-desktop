@@ -1,6 +1,7 @@
-const { createInstanceWindow, browserWindows, getHomeWindow } = require('../../libs/window.js');
 const { z } = require('zod');
-
+const fetch = require('node-fetch');
+const { exec } = require('child_process');
+const { handleFetchWithToolkitCheck } = require('./util');
 function register(server, context) {
     /* server.prompt(
         'Global.openSfToolkit',
@@ -38,18 +39,20 @@ function register(server, context) {
 
 
     server.tool(
-        "global.listOfWindows",
+        "global_listOfWindows",
         "Get list of opened windows (sf-toolkit). Call this tool to check if a window is already open for the alias.",
         {},
         async (params, _ctx) => {
+            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}/electron/list-of-windows`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            }));
+            if (result.content) return result;
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `
-                            List of windows:
-                            ${Object.keys(browserWindows).map(key => `- ${key}`).join('\n')}
-                        `,
+                        text: `List of windows:\n${result.data.windows.map(key => `- ${key}`).join('\n')}`,
                     },
                 ],
             };
@@ -58,7 +61,7 @@ function register(server, context) {
 
 
     server.tool(
-        'global.openSfToolkit',
+        'global_openSpecificOrg',
         `Launch the SF Toolkit using a specified org alias.
         Ensure the alias is valid before invoking this tool. 
         Utilize the Org.getListOfOrgs tool to retrieve and verify the desired alias from the list of orgs.
@@ -71,50 +74,24 @@ function register(server, context) {
         {
             alias: z.string().describe('Alias of the org'),
             username: z.string().describe('Username of the org').optional(),
-            //serverUrl: z.string().describe('Server url of the org').optional(),
-            //sessionId: z.string().describe('Session id of the org').optional(),
         },
         async (params, _ctx) => {
-            // Send IPC message to frontend to trigger toolkitOpening
-            if(browserWindows[params.alias]){
+            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}/electron/open-instance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            }));
+            if (result.content) return result;
+            if (!result.response.ok) {
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: 'Status : Success',
+                            text: typeof result.data === 'string' ? result.data : 'Failed to open instance',
                         },
                     ],
                 };
             }
-            
-            try {
-                await new Promise((resolve,reject) => {
-                    createInstanceWindow({
-                        parent: getHomeWindow(),
-                        isDev: context.isDev,
-                        alias: params.alias,
-                        username: params.username,
-                        serverUrl: params.serverUrl,
-                        sessionId: params.sessionId,
-                    }, ({result,error}) => {
-                        if(result){
-                            resolve(result);
-                        } else {
-                            reject(error);
-                        }
-                    });
-                })
-            } catch (err) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'Error: ' + err.message,
-                        },
-                    ],
-                };
-            }
-
             return {
                 content: [
                     {
@@ -124,6 +101,37 @@ function register(server, context) {
                 ],
             };
         },
+    );
+
+    server.tool(
+        'global_openToolkitProtocol',
+        `Open the SF Toolkit using the 'sf-toolkit://' protocol. If the toolkit is not already open, this will launch it via the OS shell.`,
+        {},
+        async (_params) => {
+            return new Promise((resolve) => {
+                exec('open "sf-toolkit://"', (error, stdout, stderr) => {
+                    if (error) {
+                        resolve({
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: `Failed to open SF Toolkit: ${stderr || error.message}`,
+                                },
+                            ],
+                        });
+                    } else {
+                        resolve({
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: 'SF Toolkit has been opened using the sf-toolkit:// protocol.',
+                                },
+                            ],
+                        });
+                    }
+                });
+            });
+        }
     );
 }
 

@@ -1,8 +1,10 @@
+require('dotenv').config();
 // MCP server using Model Context Protocol SDK
-const express = require('express');
-const { randomUUID } = require('crypto');
+//const express = require('express');
+//const { randomUUID } = require('crypto');
 const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
-const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
+const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+//const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
 //const { z } = require('zod');
 // Applications
 const applicationSOQLHandler = require('./handlers/applications/soql');
@@ -12,8 +14,37 @@ const globalHandler = require('./handlers/global');
 const orgHandler = require('./handlers/org');
 //const documentationHandler = require('./handlers/documentation');
 const navigationHandler = require('./handlers/navigation');
-const jsforceMcpHandler = require('./handlers/jsforceMcp');
+//const jsforceMcpHandler = require('./handlers/jsforceMcp');
 
+
+async function initializeMcpServer(){
+    const server = new McpServer({
+        name: "sf-toolkit-mcp-server",
+        version: "1.0.0"
+    });
+    const context = { mainWindow:null, isDev:false, ipcMainManager:null, apiUrl:`${process.env.API_HOST}:${process.env.API_PORT}` };
+
+    globalHandler.register(server, context);
+    orgHandler.register(server, context);
+    applicationSOQLHandler.register(server, context);   
+    navigationHandler.register(server, context);
+
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+
+    console.log('MCP server started');
+}
+
+try {
+    initializeMcpServer();
+} catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+}
+
+
+//jsforceMcpHandler.register(server, context);
+/* 
 function getServer({ mainWindow, isDev, ipcMainManager }) {
     const server = new McpServer({
         name: 'sf-toolkit-mcp-server',
@@ -97,4 +128,4 @@ function startMCPServer({ mainWindow, isDev, ipcMainManager, port }) {
     });
 }
 
-module.exports = { startMCPServer };
+module.exports = { startMCPServer }; */

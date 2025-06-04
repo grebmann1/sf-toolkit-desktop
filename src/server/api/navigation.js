@@ -1,0 +1,18 @@
+const { getWindowByAlias } = require('../../libs/window.js');
+const { ipcMainManager } = require('../../libs/ipc.js');
+
+module.exports = function(app) {
+    app.post('/navigation/navigate', async (req, res) => {
+        const { alias, application } = req.body;
+        const window = getWindowByAlias(alias);
+        if (window && window.webContents) {
+            await ipcMainManager.send('electron-navigate-to', { application }, window.webContents);
+            res.json({ status: 'success', message: `Navigated to ${application}` });
+        } else {
+            res.status(404).json({
+                status: 'error',
+                message: `No window found for alias: ${alias}. Please open the SF Toolkit for the alias before calling this endpoint.`,
+            });
+        }
+    });
+}; 

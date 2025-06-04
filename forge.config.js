@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 module.exports = {
     packagerConfig: {
         asar: true,
@@ -11,7 +12,10 @@ module.exports = {
             appleIdPassword: process.env.APPLE_PASSWORD,
             teamId: process.env.APPLE_TEAM_ID,
         },
-        extraResource: ['public'],
+        extraResource: [
+            'public',
+            path.resolve(__dirname, ".env")
+        ],
     },
     rebuildConfig: {},
     makers: [
