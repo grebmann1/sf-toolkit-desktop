@@ -1,6 +1,6 @@
 {
     "name": "sf-toolkit-desktop",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "main": "src/main.js",
     "repository": {
         "type": "git",
@@ -29,7 +29,8 @@
         "reduxtron": "^0.0.9",
         "sfdx-node": "^3.8.0",
         "update-electron-app": "^3.0.0",
-        "zod": "^3.25.30"
+        "zod": "^3.25.30",
+        "dotenv": "^16.3.1"
     },
     "devDependencies": {
         "@electron-forge/cli": "7.8.1",
@@ -40,7 +41,6 @@
         "@electron-forge/maker-zip": "7.8.1",
         "@electron-forge/plugin-auto-unpack-natives": "7.8.1",
         "@electron-forge/publisher-github": "7.8.1",
-        "dotenv": "^16.3.1",
         "electron": "36.2.1",
         "electron-reload": "2.0.0-alpha.1",
         "electron-serve": "2.1.1",
