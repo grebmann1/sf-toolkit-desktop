@@ -1,10 +1,11 @@
-const sfdx = require('sfdx-node');
 const path = require('path');
 const { app, shell, utilityProcess } = require('electron');
 const { exec, execSync } = require('child_process');
 const { encodeError } = require('../../utils/errors.js');
 const Store = require('../store.js');
+const { execShellCommand,killProcessOnPort } = require('../../utils/utils.js');
 
+//require('../../workers/oauth.worker.js');
 /** Worker Processing **/
 const workers = {};
 const orgsStore = new Store({ configName: 'orgs', defaults: {} });
@@ -19,7 +20,7 @@ _handleOAuthInWorker = ({ alias, instanceurl, webContents }) => {
         }
     }, 60000 * 2);
 
-    workers[workerKey] = utilityProcess.fork(path.join(__dirname, '../../workers/oauth.js'));
+    workers[workerKey] = utilityProcess.fork(path.join(__dirname, 'workers/oauth.worker.js'));
     workers[workerKey].postMessage({
         action: 'oauth',
         params: { alias, instanceurl },
@@ -27,6 +28,7 @@ _handleOAuthInWorker = ({ alias, instanceurl, webContents }) => {
     workers[workerKey].once('exit', () => {
         clearTimeout(timeout);
         console.log('exit');
+        killProcessOnPort(1717);
         webContents.send('oauth', { type: 'oauth', action: 'exit' });
         workers[workerKey] = null;
     });
@@ -77,26 +79,22 @@ getStoredOrgs = async () => {
 // Update getAllOrgs to return both SFDX and stored orgs
 getAllOrgs = async (_) => {
     const command = 'sfdx force:org:list --json --verbose';
-    return new Promise((resolve, reject) => {
-        exec(command, async (error, stdout, stderr) => {
-            let sfdxOrgs = null;
-            if (error) {
-                sfdxOrgs = { error: encodeError(error) };
-            } else {
-                try {
-                    sfdxOrgs = JSON.parse(stdout.toString());
-                } catch (e) {
-                    sfdxOrgs = { error: encodeError(e) };
-                }
-            }
-            // Fetch stored orgs
-            const stored = await getStoredOrgs();
-            resolve({
-                sfdxOrgs,
-                storedOrgs: stored.res || [],
-            });
-        });
-    });
+    try {
+        const sfdxOrgs = await execShellCommand(command, { parseJson: true });
+        // Fetch stored orgs
+        const stored = await getStoredOrgs();
+        return {
+            sfdxOrgs,
+            storedOrgs: stored.res || [],
+        };
+    } catch (error) {
+        // If error, still try to fetch stored orgs
+        const stored = await getStoredOrgs();
+        return {
+            sfdxOrgs: { error: encodeError(error) },
+            storedOrgs: stored.res || [],
+        };
+    }
 };
 
 seeDetails = async (_, { alias }) => {
@@ -112,45 +110,32 @@ seeDetails = async (_, { alias }) => {
         };
         return { res };
     }
-    // Fallback to sfdx if not in store
-    return new Promise((resolve, reject) => {
-        Promise.all([
-            sfdx.force.org.display({
-                _quiet: true,
-                json: true,
-                verbose: true,
-                _rejectOnError: true,
-                targetusername: alias,
-            }),
-            sfdx.force.org.open({
-                targetusername: alias,
-                urlonly: true,
-            }),
-        ])
-            .then((results) => {
-                res = {
-                    ...results[0],
-                    ...{
-                        loginUrl: results[1].url,
-                        orgId: results[0].id,
-                    },
-                };
-                resolve({ res });
-            })
-            .catch((e) => {
-                resolve({ error: encodeError(e) });
-            });
-    });
+    // Fallback to shell if not in store
+    try {
+        const [orgDisplay, orgOpen] = await Promise.all([
+            execShellCommand(`sfdx force:org:display --json --targetusername ${alias} --verbose`, { parseJson: true }),
+            execShellCommand(`sfdx force:org:open --urlonly --targetusername ${alias} --json`, { parseJson: true })
+        ]);
+        const res = {
+            ...orgDisplay.result,
+            loginUrl: orgOpen.result.url,
+            orgId: orgDisplay.result.id,
+        };
+        return { res };
+    } catch (e) {
+        return { error: encodeError(e) };
+    }
 };
 
 openOrgUrl = async (_, { alias, redirectUrl }) => {
-    const result = await sfdx.force.org.open({
-        targetusername: alias,
-        urlonly: true,
-    });
-    if (result) {
-        let url = result.url + (redirectUrl ? `&retURL=${encodeURIComponent(redirectUrl)}` : '');
-        shell.openExternal(url);
+    try {
+        const result = await execShellCommand(`sfdx force:org:open --urlonly --targetusername ${alias} --json`, { parseJson: true });
+        if (result && result.result && result.result.url) {
+            let url = result.result.url + (redirectUrl ? `&retURL=${encodeURIComponent(redirectUrl)}` : '');
+            shell.openExternal(url);
+        }
+    } catch (e) {
+        // Optionally handle error
     }
 };
 
@@ -178,13 +163,7 @@ unsetAlias = async (_, { alias }) => {
             orgsStore.set(null, orgsStore.data); // Save updated data
         } else {
             // Remove from sfdx aliases
-            await sfdx.alias.unset(
-                {
-                    _quiet: true,
-                    _rejectOnError: true,
-                },
-                { args: [`${alias}`] },
-            );
+            await execShellCommand(`sfdx force:alias:unset ${alias} --json`, { parseJson: true });
         }
         return null;
     } catch (e) {
@@ -206,13 +185,7 @@ logout = async (_, { alias }) => {
 
 setAlias = async (_, { alias, username }) => {
     try {
-        let response = await sfdx.alias.set(
-            {
-                _quiet: true,
-                _rejectOnError: true,
-            },
-            { args: [`${alias}=${username}`] },
-        );
+        let response = await execShellCommand(`sfdx force:alias:set ${alias}=${username} --json`, { parseJson: true });
         return { result: response };
     } catch (e) {
         return { error: encodeError(e) };

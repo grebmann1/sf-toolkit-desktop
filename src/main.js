@@ -1,6 +1,3 @@
-require('dotenv').config();
-
-/** Fix Path **/
 require('fix-path')();
 
 const { app, nativeImage } = require('electron');
@@ -8,25 +5,27 @@ const { browserWindows, createMainWindow, createInstanceWindow, getWindowByAlias
 const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
 const path = require('path');
-const { startMCPServer } = require('./mcp/server');
 const Store = require('./libs/store.js');
+const expressApiServer = require('./server/api');
 
 /** Menu **/
 //require('./utils/menu.js');
 
 /** Auto Updater **/
-const isDev = !app.isPackaged;
+const isDev = process.env.NODE_ENV === 'development';
+console.log('process.env.PROD_URL',process.env.PROD_URL);
 console.log('---> isDev   <---', isDev);
-console.log('---> version <---', app.getVersion());
+console.log('---> isPackaged   <---', app.isPackaged);
 
 /** Dev Mode  **/
-if (isDev) {
+if (app.isPackaged) {
+    const { updateElectronApp } = require('update-electron-app');
+    updateElectronApp(); // additional configuration options available
+    
+} else {
     /*require('electron-reload')(__dirname, {
       electron: path.join(__dirname,'node_modules', '.bin', 'electron')
     })*/
-} else {
-    const { updateElectronApp } = require('update-electron-app');
-    updateElectronApp(); // additional configuration options available
 }
 /** Store **/
 
@@ -66,6 +65,7 @@ if (process.defaultApp) {
     app.setAsDefaultProtocolClient('sf-toolkit');
 }
 
+
 // Handle protocol URLs (macOS)
 app.on('open-url', (event, url) => {
     event.preventDefault();
@@ -83,13 +83,8 @@ app.whenReady().then(async () => {
     // Set the home window in the browserWindows map
     browserWindows.home = mainWindow;
 
-    // Start MCP server, pass mainWindow
-    startMCPServer({
-        mainWindow,
-        isDev,
-        ipcMainManager,
-        port: store.get('mcpPort')
-    });
+    // Start Express REST API server for window management
+    expressApiServer; // Just require to start the server
 });
 
 app.on('window-all-closed', () => {

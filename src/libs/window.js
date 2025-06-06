@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { BrowserWindow, shell,ipcMain } = require('electron');
 const path = require('path');
 const Store = require('./store.js');
@@ -30,7 +31,7 @@ const createWindow = ({ parent, alwaysOnTop, alias }) => {
         show: false,
         webPreferences: {
             devTools: true,
-            preload: path.join(__dirname, '..', 'preload.js'),
+            preload: path.join(__dirname, '..','renderer', 'lib', 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
             webviewTag: false,
@@ -97,7 +98,6 @@ exports.getHomeWindow = () => {
 
 exports.getBaseUrl = (isDev) => {
     return isDev ? process.env.DEV_URL : process.env.PROD_URL;
-    //return isDev ? 'http://localhost:3000' : 'https://sf-toolkit.com';
 };
 
 exports.createMainWindow = ({ isDev, url }) => {
@@ -135,7 +135,7 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
                 callback({result});
             }
             // Fake Loading for testing !!!
-            fakeCall();
+            //fakeCall();
         })
         .catch((error) => {
             callback({error});
@@ -144,9 +144,9 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
         
     });
 
-    async function fakeCall() {
+    /* async function fakeCall() {
         const result = await ipcMainManager.send('electron-soql-call', { "query": "SELECT Id, Name FROM Account","alias": "default-toolkit"}, browserWindow.webContents);
-    }
+    } */
 
     return browserWindow;
 };

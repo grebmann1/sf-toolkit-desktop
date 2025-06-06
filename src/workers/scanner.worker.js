@@ -1,7 +1,13 @@
-const sfdx = require('sfdx-node');
-const path = require('node:path');
-const { exec } = require('child_process');
-const { encodeError } = require('../utils/errors.js');
+
+const { exec } = require('node:child_process');
+const encodeError = (errors) => {
+    console.error('Inner: ',errors);
+    // we only handle 1 error for now !! (we could send an array, that's not a problem !)
+    let e = [].concat(errors)[0];
+    let res = { name: e.name, message: e.message };
+    console.error({ ...e });
+    return res;
+};
 
 scanner = async ({ alias, command }) => {
     try {
