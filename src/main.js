@@ -1,5 +1,3 @@
-//require('dotenv').config();
-/** Fix Path **/
 require('fix-path')();
 
 const { app, nativeImage } = require('electron');
@@ -14,17 +12,20 @@ const expressApiServer = require('./server/api');
 //require('./utils/menu.js');
 
 /** Auto Updater **/
-const isDev = !app.isPackaged;
+const isDev = process.env.NODE_ENV === 'development';
+console.log('process.env.PROD_URL',process.env.PROD_URL);
 console.log('---> isDev   <---', isDev);
+console.log('---> isPackaged   <---', app.isPackaged);
 
 /** Dev Mode  **/
-if (isDev) {
+if (app.isPackaged) {
+    const { updateElectronApp } = require('update-electron-app');
+    updateElectronApp(); // additional configuration options available
+    
+} else {
     /*require('electron-reload')(__dirname, {
       electron: path.join(__dirname,'node_modules', '.bin', 'electron')
     })*/
-} else {
-    const { updateElectronApp } = require('update-electron-app');
-    updateElectronApp(); // additional configuration options available
 }
 /** Store **/
 
@@ -63,6 +64,7 @@ if (process.defaultApp) {
 } else {
     app.setAsDefaultProtocolClient('sf-toolkit');
 }
+
 
 // Handle protocol URLs (macOS)
 app.on('open-url', (event, url) => {

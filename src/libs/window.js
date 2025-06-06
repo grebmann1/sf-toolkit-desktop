@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { BrowserWindow, shell,ipcMain } = require('electron');
 const path = require('path');
 const Store = require('./store.js');
@@ -30,7 +31,7 @@ const createWindow = ({ parent, alwaysOnTop, alias }) => {
         show: false,
         webPreferences: {
             devTools: true,
-            preload: path.join(__dirname, '..', 'preload.js'),
+            preload: path.join(__dirname, '..','renderer', 'lib', 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
             webviewTag: false,
@@ -96,8 +97,7 @@ exports.getHomeWindow = () => {
 };
 
 exports.getBaseUrl = (isDev) => {
-    //return isDev ? process.env.DEV_URL : process.env.PROD_URL;
-    return isDev ? 'http://localhost:3000' : 'https://sf-toolkit.com';
+    return isDev ? process.env.DEV_URL : process.env.PROD_URL;
 };
 
 exports.createMainWindow = ({ isDev, url }) => {

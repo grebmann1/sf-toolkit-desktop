@@ -2,10 +2,8 @@
 .idea
 .env
 node_modules
-dist
 package-lock.json
-__lwr_cache__
-site
 out/
 *.zip
-chrome_ext/
+.cursor
+.webpack/

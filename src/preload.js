@@ -1,4 +1,4 @@
-const { ipcRenderer, contextBridge,app } = require('electron');
+const { ipcRenderer, contextBridge } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
     invoke: (channel, args) => {
@@ -19,5 +19,4 @@ contextBridge.exposeInMainWorld('electron', {
     listener_off: (channel) => ipcRenderer.removeAllListeners(channel),
     setChannel: (channel) => this.channel = channel,
     getChannel: () => this.channel,
-    getAppVersion: () => app.getVersion(),
 });

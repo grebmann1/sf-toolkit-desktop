@@ -1,5 +1,7 @@
 require('dotenv').config();
 const path = require('path');
+const { FusesPlugin } = require('@electron-forge/plugin-fuses');
+const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
     packagerConfig: {
         asar: true,
@@ -29,6 +31,25 @@ module.exports = {
             name: '@electron-forge/plugin-auto-unpack-natives',
             config: {},
         },
+        {
+            name: '@electron-forge/plugin-webpack',
+            config: {
+                mainConfig: './webpack.main.config.js',
+                renderer: {
+                    config: './webpack.renderer.config.js',
+                    
+                    entryPoints: [
+                        {
+                            name: 'lib',
+                            preload: {
+                                js: './src/preload.js',
+                            },
+                        }
+                    ],
+                },
+                "loggerPort": "9001"
+            },
+        }
     ],
     publishers: [
         {

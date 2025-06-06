@@ -1,3 +1,4 @@
+const { exec } = require('node:child_process');
 const hashCode = (str) => {
     let hash = 0;
     for (let i = 0, len = str.length; i < len; i++) {
@@ -58,4 +59,37 @@ function guid() {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 }
 
-module.exports = { hashCode, runActionAfterTimeOut, isNotUndefinedOrNull, isEmpty, promiseWithTimeout,guid };
+const execShellCommand = (cmd, { parseJson = false } = {}) => {
+    
+    return new Promise((resolve, reject) => {
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+                reject(stderr || error);
+                return;
+            }
+            if (parseJson) {
+                try {
+                    resolve(JSON.parse(stdout));
+                } catch (e) {
+                    reject(`Failed to parse JSON: ${e.message}\nOutput: ${stdout}`);
+                }
+            } else {
+                resolve(stdout);
+            }
+        });
+    });
+};
+
+const killProcessOnPort = async (port) => {
+    const cmd = `lsof -ti:${port} | xargs kill -9`;
+    try {
+        await execShellCommand(cmd);
+    } catch (e) {
+        // It's okay if nothing was running on the port
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`No process to kill on port ${port} or error:`, e);
+        }
+    }
+};
+
+module.exports = { hashCode, runActionAfterTimeOut, isNotUndefinedOrNull, isEmpty, promiseWithTimeout,guid,execShellCommand,killProcessOnPort };
