@@ -1,8 +1,10 @@
 const { getWindowByAlias, createInstanceWindow, browserWindows,getHomeWindow } = require('../../libs/window.js');
 const { app } = require('electron');
 const isDev = !app.isPackaged;
+const { ENDPOINTS } = require('../../../shared');
+
 module.exports = function(app) {
-    app.post('/electron/open-instance', async (req, res) => {
+    app.post(ENDPOINTS.OPEN_INSTANCE, async (req, res) => {
         const { alias, username, serverUrl, sessionId } = req.body;
         if (!alias && !username) {
             return res.status(400).json({ error: 'alias or username is required' });
@@ -35,7 +37,7 @@ module.exports = function(app) {
         }
     });
 
-    app.post('/electron/list-of-windows', (req, res) => {
+    app.post(ENDPOINTS.LIST_OF_WINDOWS, (req, res) => {
         res.json({
             windows: Object.keys(browserWindows)
         });

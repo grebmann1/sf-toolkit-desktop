@@ -138,7 +138,9 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
             //fakeCall();
         })
         .catch((error) => {
-            callback({error});
+            if(callback){
+                callback({error});
+            }
         });
 
         

@@ -2,9 +2,10 @@ const { getAllOrgs } = require('../../libs/modules/org');
 const jsforce = require('jsforce');
 const { isNotUndefinedOrNull, isEmpty } = require('../../utils/utils');
 const { ipcMainManager } = require('../../libs/ipc.js');
+const { ENDPOINTS } = require('../../../shared');
 
 module.exports = function(app) {
-    app.post('/org/get-list-of-orgs', async (req, res) => {
+    app.post(ENDPOINTS.GET_LIST_OF_ORGS, async (req, res) => {
         const { sfdxOrgs, storedOrgs } = await getAllOrgs();
         let orgs = [].concat(
             sfdxOrgs.result.nonScratchOrgs.map(x => ({
@@ -20,10 +21,11 @@ module.exports = function(app) {
                 credentialType: x.credentialType || 'USERNAME',
             }))
         );
+        console.log('orgs', orgs);
         res.json({ orgs });
     });
 
-    app.post('/org/get-session-id-and-server-url', async (req, res) => {
+    app.post(ENDPOINTS.GET_SESSION_ID_AND_SERVER_URL, async (req, res) => {
         const { alias } = req.body;
         try {
             const { sfdxOrgs, storedOrgs } = await getAllOrgs();

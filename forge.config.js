@@ -16,7 +16,8 @@ module.exports = {
         },
         extraResource: [
             'public',
-            path.resolve(__dirname, ".env")
+            path.resolve(__dirname, ".env"),
+            path.resolve(__dirname, "mcp/dist/mcp.js"),
         ],
     },
     rebuildConfig: {},
@@ -47,9 +48,11 @@ module.exports = {
                         }
                     ],
                 },
-                "loggerPort": "9001"
+                "loggerPort": "9001",
+                "port": "3050"
             },
-        }
+        },
+        
     ],
     publishers: [
         {

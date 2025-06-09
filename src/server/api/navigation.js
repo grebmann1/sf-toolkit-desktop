@@ -1,8 +1,9 @@
 const { getWindowByAlias } = require('../../libs/window.js');
 const { ipcMainManager } = require('../../libs/ipc.js');
+const { ENDPOINTS } = require('../../../shared');
 
 module.exports = function(app) {
-    app.post('/navigation/navigate', async (req, res) => {
+    app.post(ENDPOINTS.NAVIGATION_NAVIGATE, async (req, res) => {
         const { alias, application } = req.body;
         const window = getWindowByAlias(alias);
         if (window && window.webContents) {

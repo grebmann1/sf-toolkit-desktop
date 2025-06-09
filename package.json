@@ -14,12 +14,14 @@
         "publish": "npm install --silent; NODE_ENV=production electron-forge publish",
         "publish:dry": "npm install --silent; NODE_ENV=production electron-forge publish --dry-run",
         "publish:run": "npm install --silent; NODE_ENV=production electron-forge publish --from-dry-run",
-        "start:dev:electron": "NODE_ENV=development electron .",
-        "start": "DEBUG=electron-packager NODE_ENV=development electron-forge start",
+        "start:dev:electron": "DEBUG=electron-packager NODE_ENV=development electron-forge start",
         "start:prod": "DEBUG=electron-packager NODE_ENV=production electron-forge start",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "replace:jsforce": "node scripts/replace-jsforce-connection.js"
+        "replace:jsforce": "node scripts/replace-jsforce-connection.js",
+        "build:prod:mcp": "cd mcp && npm install --silent && npm run build",
+        "start:dev:mcp": "cd mcp && npm run dev",
+        "start:dev:all": "npm-run-all --parallel start:dev:electron start:dev:mcp"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.12.0",
@@ -53,7 +55,8 @@
         "copy-webpack-plugin": "^13.0.0",
         "electron": "36.2.1",
         "electron-reload": "2.0.0-alpha.1",
-        "electron-serve": "2.1.1"
+        "electron-serve": "2.1.1",
+        "npm-run-all": "^4.1.5"
     },
     "build": {
         "protocols": [
