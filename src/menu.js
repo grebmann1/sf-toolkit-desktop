@@ -21,16 +21,14 @@ const template = [
           { role: 'about' },
           { type: 'separator' },
           { label: 'MCP Config', click: async () => {
-            console.log('MCP Config',getMcpConfig())
             const { dialog } = require('electron')
             const result = await dialog.showMessageBox({
               title: 'Get MCP Config',
               message: `node ${getMcpPath()}`,
-              buttons: ['Copy MCP Configuration'],
+              buttons: ['Copy MCP Configuration','Close'],
               defaultId: 0,
               cancelId: 0,
             });
-            console.log('result', result);
             if (result.response === 0) {
                 clipboard.writeText(getMcpConfig())
             }

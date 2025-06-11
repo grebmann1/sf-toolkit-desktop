@@ -2,9 +2,9 @@
     "name": "sf-toolkit-mcp",
     "version": "1.0.0",
     "main": "dist/index.js",
-    "type": "commonjs",
+    "type": "module",
     "scripts": {
-        "dev": "node build.js --watch",
+        "dev": "NODE_ENV=development node build.js --watch",
         "start": "node dist/mcp.js",
         "build": "node build.js"
     },

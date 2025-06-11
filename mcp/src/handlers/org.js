@@ -1,11 +1,10 @@
-const fetch = require('node-fetch');
-const { z } = require('zod');
-const { handleFetchWithToolkitCheck } = require('./util');
-const { ENDPOINTS } = require('../../../shared');
+import fetch from 'node-fetch';
+import { z } from 'zod';
+import { handleFetchWithToolkitCheck } from './util.js';
+import { ENDPOINTS } from '../../../shared.js';
 
 function register(server, context) {
     server.tool('Org_getListOfOrgs', `Get list of orgs that are stored in the local storage. The list of orgs includes the orgs that are stored in the local storage and the orgs that are stored in the sfdx orgs.`, async (params) => {
-        console.log('fetch', `${context.apiUrl}${ENDPOINTS.GET_LIST_OF_ORGS}`);
         const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.GET_LIST_OF_ORGS}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -48,4 +47,4 @@ function register(server, context) {
     }
 }
 
-module.exports = { register };
+export default { register };

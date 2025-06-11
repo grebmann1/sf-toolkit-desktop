@@ -1,22 +1,21 @@
 #!/usr/bin/env node
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 // MCP server using Model Context Protocol SDK
 //const express = require('express');
 //const { randomUUID } = require('crypto');
-const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
-const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 //const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
 //const { z } = require('zod');
 // Applications
-const applicationSOQLHandler = require('./handlers/applications/soql');
-const restapiHandler = require('./handlers/applications/restapi');
+import applicationSOQLHandler from './handlers/applications/soql.js';
+import restapiHandler from './handlers/applications/restapi.js';
 // Others
-const globalHandler = require('./handlers/global');
-const orgHandler = require('./handlers/org');
+import globalHandler from './handlers/global.js';
+import orgHandler from './handlers/org.js';
 //const documentationHandler = require('./handlers/documentation');
-const navigationHandler = require('./handlers/navigation');
-//const jsforceMcpHandler = require('./handlers/jsforceMcp');
-
+import navigationHandler from './handlers/navigation.js';
 
 async function initializeMcpServer(){
     const server = new McpServer({

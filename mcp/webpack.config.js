@@ -1,27 +1,37 @@
-const path = require('path');
-const webpack = require('webpack');
-const nodeExternals = require('webpack-node-externals');
+import path from 'path';
+import webpack from 'webpack';
+import nodeExternals from 'webpack-node-externals';
+import { fileURLToPath } from 'url';
 
-module.exports = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const isDev = process.env.NODE_ENV === 'development';
+export default {
   entry: './src/index.js',
   target: 'node',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'mcp.js',
-    libraryTarget: 'commonjs2',
+    library: {
+      type: 'module',
+    },
+    module: true,
+  },
+  experiments: {
+    outputModule: true,
   },
   module: {
     rules: [
       // Add loaders here if you use other file types (e.g., Babel for ES6)
     ],
   },
-  externals: [
-    nodeExternals(),
-  ],
+  externals: [],
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.ts', '.json', '.mjs', '.js'],
+    mainFields: ['module', 'main'],
   },
-  mode: 'production',
+  mode: isDev ? 'development' : 'production',
   plugins: [
     new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }),
   ],

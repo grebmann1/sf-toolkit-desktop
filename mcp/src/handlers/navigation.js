@@ -1,7 +1,7 @@
-const fetch = require('node-fetch');
-const { z } = require('zod');
-const { handleFetchWithToolkitCheck } = require('./util');
-const { ENDPOINTS } = require('../../../shared');
+import fetch from 'node-fetch';
+import { z } from 'zod';
+import { handleFetchWithToolkitCheck } from './util.js';
+import { ENDPOINTS } from '../../../shared.js';
 
 function register(server, context) {
     server.tool(
@@ -53,4 +53,4 @@ function register(server, context) {
     );
 }
 
-module.exports = { register };
+export default { register };

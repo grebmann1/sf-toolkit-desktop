@@ -1,8 +1,8 @@
-const { z } = require('zod');
-const fetch = require('node-fetch');
-const { exec } = require('child_process');
-const { handleFetchWithToolkitCheck } = require('./util');
-const { ENDPOINTS } = require('../../../shared');
+import { z } from 'zod';
+import fetch from 'node-fetch';
+import { exec } from 'child_process';
+import { handleFetchWithToolkitCheck } from './util.js';
+import { ENDPOINTS } from '../../../shared.js';
 
 function register(server, context) {
     /* server.prompt(
@@ -137,7 +137,7 @@ function register(server, context) {
     );
 }
 
-module.exports = { register };
+export default { register };
 
 
 /* - If the credentialType is USERNAME, then do the following:

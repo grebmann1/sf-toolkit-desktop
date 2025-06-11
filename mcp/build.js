@@ -1,5 +1,5 @@
-const webpack = require('webpack');
-const config = require('./webpack.config.js');
+import webpack from 'webpack';
+import config from './webpack.config.js';
 
 const isWatch = process.argv.includes('--watch');
 

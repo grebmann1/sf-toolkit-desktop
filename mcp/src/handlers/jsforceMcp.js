@@ -1,8 +1,8 @@
 // JSforce MCP Implementation
 // This file will contain all MCP integration points for interacting with Salesforce using JSforce.
 // Authentication is handled externally; sessionId and serverUrl will be provided for each operation.
-const { z } = require('zod');
-const jsforce = require('jsforce');
+import { z } from 'zod';
+import jsforce from 'jsforce';
 
 /**
  * Utility: Create a JSforce connection from sessionId and serverUrl
@@ -444,32 +444,5 @@ const getLatestDeployments = async ({ sessionId, serverUrl }) => {
 };
 
 // Export stubs for each integration point (to be implemented one by one)
-module.exports = {
-    createConnection, // Utility
-    // 1. SOQL Query Execution
-    soqlQuery,
-    // 2. REST API Call
-    restApiCall,
-    // 3. Metadata API Operations
-    metadataOperation,
-    // 4. Apex Execution
-    executeApex,
-    // 5. Tooling API Operations
-    toolingQuery: async ({ sessionId, serverUrl, toolingQuery }) => {
-        // TODO: Implement Tooling API query
-        throw new Error('Not implemented');
-    },
-    // 6. Bulk API Operations
-    bulkOperation: async ({ sessionId, serverUrl, sobjectType, operation, records }) => {
-        // TODO: Implement Bulk API operations
-        throw new Error('Not implemented');
-    },
-    // 7. Describe SObject
-    describeSObject,
-    // 8. List SObjects
-    listSObjects,
-    // 9. User Info
-    getUserInfo,
-    getLatestDeployments,
-    register,
-}; 
+export { createConnection, soqlQuery, restApiCall, metadataOperation, executeApex, toolingQuery, bulkOperation, describeSObject, listSObjects, getUserInfo, getLatestDeployments };
+export default { register }; 

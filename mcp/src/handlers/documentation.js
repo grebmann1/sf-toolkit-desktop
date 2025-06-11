@@ -1,5 +1,5 @@
-const fetch = require('node-fetch');
-const { handleFetchWithToolkitCheck } = require('./util');
+import fetch from 'node-fetch';
+import { handleFetchWithToolkitCheck } from './util.js';
 
 function register(server, context) {
     server.tool('Documentation_searchDocumentation', {}, async (params) => {
@@ -20,4 +20,4 @@ function register(server, context) {
     });
 }
 
-module.exports = { register };
+export default { register };

@@ -1,7 +1,7 @@
-const fetch = require('node-fetch');
-const { handleFetchWithToolkitCheck } = require('../util');
-const { z } = require('zod');
-const { ENDPOINTS } = require('../../../../shared');
+import fetch from 'node-fetch';
+import { handleFetchWithToolkitCheck } from '../util.js';
+import { z } from 'zod';
+import { ENDPOINTS } from '../../../../shared.js';
 
 function register(server, context) {
     /* server.tool(
@@ -41,20 +41,11 @@ function register(server, context) {
         },
         async (params) => {
             const endpoint = `${context.apiUrl}${ENDPOINTS.SOQL_QUERY}`;
-            console.info(JSON.stringify(params));
-            server.sendLoggingMessage({
-                level: "info",
-                data: `endpoint: ${endpoint}`,
-            });
             const result = await handleFetchWithToolkitCheck(fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(params)
             }));
-            server.sendLoggingMessage({
-                level: "info",
-                data: `SOQL_displayQueryInSFToolkit: ${JSON.stringify(result)}`,
-            });
             if (result.content) return result; // In case of error, the content is returned !
             if (result.response.ok) {
                 return {
@@ -150,4 +141,4 @@ function register(server, context) {
     );
 }
 
-module.exports = { register };
+export default { register };

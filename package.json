@@ -19,7 +19,7 @@
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "replace:jsforce": "node scripts/replace-jsforce-connection.js",
-        "build:prod:mcp": "cd mcp && npm install --silent && npm run build",
+        "build:prod:mcp": "cd mcp && npm install --silent && NODE_ENV=production npm run build",
         "start:dev:mcp": "cd mcp && npm run dev",
         "start:dev:all": "npm-run-all --parallel start:dev:electron start:dev:mcp"
     },

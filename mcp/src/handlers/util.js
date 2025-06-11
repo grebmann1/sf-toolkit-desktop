@@ -1,10 +1,9 @@
-
 /**
  * Utility to handle fetch responses and catch 404 errors for SF Toolkit API calls.
  * If a 404 is detected, returns a user-friendly message to open the SF Toolkit first.
  * Otherwise, returns the parsed JSON or throws the error.
  */
-async function handleFetchWithToolkitCheck(fetchPromise) {
+export async function handleFetchWithToolkitCheck(fetchPromise) {
     try {
         const response = await fetchPromise;
         // Try to parse JSON, fallback to text if not JSON
@@ -27,6 +26,4 @@ async function handleFetchWithToolkitCheck(fetchPromise) {
             ],
         };
     }
-}
-
-module.exports = { handleFetchWithToolkitCheck }; 
+} 
