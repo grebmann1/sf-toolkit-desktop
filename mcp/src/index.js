@@ -36,8 +36,18 @@ async function initializeMcpServer(){
     
     const transport = new StdioServerTransport();
     await server.connect(transport);
-
-    console.log(`MCP server started and communicating with the SF Toolkit on port ${apiPort}`);
+    /* console.log(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+            _meta: {
+                message: "MCP server started and communicating with the SF Toolkit on port " + apiPort,
+                timestamp: new Date().toISOString(),
+                version: "1.0.0"
+            }
+        },
+      })); */
 }
 
 try {

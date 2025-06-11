@@ -22,6 +22,7 @@ class IpcMainManager extends EventEmitter {
                 this.messageQueue.set(_target, [...existing, [channel, [attributes,responseChannel]]]);
                 return;
             }
+            console.log('send', channel, [attributes,responseChannel]);
             _target.send(channel, [attributes,responseChannel]);
             // Use promiseWithTimeout to reject if not resolved in time
             promiseWithTimeout(

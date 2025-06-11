@@ -12,6 +12,10 @@ require('./api/restapi')(app);
 require('./api/navigation')(app);
 require('./api/documentation')(app);
 
+app.use((req, res, next) => {
+    res.status(404).json({ status: 'error', message: 'Endpoint not found' });
+});
+
 app.listen(process.env.API_PORT, () => {
     console.log(`API server listening on ${process.env.API_HOST}:${process.env.API_PORT}`);
 });

@@ -13,7 +13,6 @@ const ENDPOINTS = {
     REST_API_EXECUTE: '/api/execute',
     REST_API_SCRIPTS: '/api/scripts',
     SOQL_NAVIGATE_TAB: '/soql/navigate-tab',
-    SOQL_FETCH_QUERIES: '/soql/queries',
     NAVIGATION_NAVIGATE: '/navigation/navigate',
 };
 

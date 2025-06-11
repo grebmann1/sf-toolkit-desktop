@@ -17,7 +17,7 @@ module.exports = {
         extraResource: [
             'public',
             path.resolve(__dirname, ".env"),
-            path.resolve(__dirname, "mcp/dist/mcp.js"),
+            path.resolve(__dirname, "mcp/dist/mcp.js")
         ],
     },
     rebuildConfig: {},

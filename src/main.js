@@ -1,6 +1,5 @@
 require('fix-path')();
-
-const { app, nativeImage } = require('electron');
+const { app, nativeImage, Menu } = require('electron');
 const { browserWindows, createMainWindow, createInstanceWindow, getWindowByAlias } = require('./libs/window.js');
 const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
@@ -8,9 +7,11 @@ const path = require('path');
 const Store = require('./libs/store.js');
 const expressApiServer = require('./server/api');
 
-/** Menu **/
-//require('./utils/menu.js');
 
+
+/** Menu **/
+const { menu } = require('./menu.js');
+Menu.setApplicationMenu(menu);
 /** Auto Updater **/
 const isDev = process.env.NODE_ENV === 'development';
 console.log('process.env.PROD_URL',process.env.PROD_URL);

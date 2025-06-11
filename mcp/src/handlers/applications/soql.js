@@ -40,18 +40,28 @@ function register(server, context) {
             tabId: z.string().describe('The ID of the SOQL tab to navigate to').optional(),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.SOQL_QUERY}`, {
+            const endpoint = `${context.apiUrl}${ENDPOINTS.SOQL_QUERY}`;
+            console.info(JSON.stringify(params));
+            server.sendLoggingMessage({
+                level: "info",
+                data: `endpoint: ${endpoint}`,
+            });
+            const result = await handleFetchWithToolkitCheck(fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(params)
             }));
-            if (result.content) return result;
+            server.sendLoggingMessage({
+                level: "info",
+                data: `SOQL_displayQueryInSFToolkit: ${JSON.stringify(result)}`,
+            });
+            if (result.content) return result; // In case of error, the content is returned !
             if (result.response.ok) {
                 return {
                     content: [
                         {
                             type: 'text',
-                            text: result.data.message,
+                            text: JSON.stringify(result.data),
                         },
                     ],
                 };
@@ -111,7 +121,7 @@ function register(server, context) {
             alias: z.string().describe('The alias of the org'),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.SOQL_FETCH_QUERIES}`, {
+            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.SOQL_QUERIES}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(params)

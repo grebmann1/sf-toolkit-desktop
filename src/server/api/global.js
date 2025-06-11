@@ -7,7 +7,10 @@ module.exports = function(app) {
     app.post(ENDPOINTS.OPEN_INSTANCE, async (req, res) => {
         const { alias, username, serverUrl, sessionId } = req.body;
         if (!alias && !username) {
-            return res.status(400).json({ error: 'alias or username is required' });
+            return res.status(400).json({ 
+                status: 'error', 
+                message: 'alias or username is required' 
+            });
         }
 
         if(browserWindows[alias]){
@@ -33,7 +36,10 @@ module.exports = function(app) {
             })
             res.json({ status: 'success' });
         } catch (err) {
-            res.status(500).json({ error: err.message });
+            res.status(500).json({ 
+                status: 'error', 
+                message: err.message || err.toString() 
+            });
         }
     });
 

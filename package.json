@@ -1,6 +1,6 @@
 {
     "name": "sf-toolkit-desktop",
-    "version": "1.2.4",
+    "version": "1.2.6",
     "main": ".webpack/main",
     "license": "MIT",
     "repository": {
@@ -28,6 +28,7 @@
         "@reduxjs/toolkit": "^2.0.1",
         "command-exists": "^1.2.9",
         "dotenv": "^16.3.1",
+        "electron-root-path": "^1.1.0",
         "electron-squirrel-startup": "1.0.1",
         "express": "5.1.0",
         "fix-path": "3.0.0",

@@ -6,23 +6,30 @@ const { ENDPOINTS } = require('../../../shared');
 
 module.exports = function(app) {
     app.post(ENDPOINTS.GET_LIST_OF_ORGS, async (req, res) => {
-        const { sfdxOrgs, storedOrgs } = await getAllOrgs();
-        let orgs = [].concat(
-            sfdxOrgs.result.nonScratchOrgs.map(x => ({
-                ...x,
-                credentialType: 'OAUTH',
-            })),
-            sfdxOrgs.result.scratchOrgs.map(x => ({
-                ...x,
-                credentialType: 'OAUTH',
-            })),
-            storedOrgs.map(x => ({
-                ...x,
-                credentialType: x.credentialType || 'USERNAME',
-            }))
-        );
-        console.log('orgs', orgs);
-        res.json({ orgs });
+        try {
+            const { sfdxOrgs, storedOrgs } = await getAllOrgs();
+            let orgs = [].concat(
+                sfdxOrgs.result.nonScratchOrgs.map(x => ({
+                    ...x,
+                    credentialType: 'OAUTH',
+                })),
+                sfdxOrgs.result.scratchOrgs.map(x => ({
+                    ...x,
+                    credentialType: 'OAUTH',
+                })),
+                storedOrgs.map(x => ({
+                    ...x,
+                    credentialType: x.credentialType || 'USERNAME',
+                }))
+            );
+            console.log('orgs', orgs);
+            res.json({ orgs });
+        } catch (e) {   
+            res.status(500).json({ 
+                status: 'error', 
+                message: e.message || e.toString() 
+            });
+        }
     });
 
     app.post(ENDPOINTS.GET_SESSION_ID_AND_SERVER_URL, async (req, res) => {
@@ -51,7 +58,10 @@ module.exports = function(app) {
             }
             res.json({ sessionId, serverUrl });
         } catch (e) {
-            res.status(500).json({ success: false, error: e.message || e.toString() });
+            res.status(500).json({ 
+                status: 'error', 
+                message: e.message || e.toString() 
+            });
         }
     });
 }; 
