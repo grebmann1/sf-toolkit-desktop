@@ -38,29 +38,28 @@ function register(server, context) {
         ],
     })); */
 
-
-
     server.tool(
-        "global_listOfWindows",
-        "Get list of opened windows (sf-toolkit). Call this tool to check if a window is already open for the alias.",
+        'global_listOfWindows',
+        'Get list of opened windows (sf-toolkit). Call this tool to check if a window is already open for the alias.',
         {},
         async (params, _ctx) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.LIST_OF_WINDOWS}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.LIST_OF_WINDOWS}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                }),
+            );
             if (result.content) return result;
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `List of windows:\n${result.data.windows.map(key => `- ${key}`).join('\n')}`,
+                        text: `List of windows:\n${result.data.windows.map((key) => `- ${key}`).join('\n')}`,
                     },
                 ],
             };
         },
     );
-
 
     server.tool(
         'global_openSpecificOrg',
@@ -78,11 +77,13 @@ function register(server, context) {
             username: z.string().describe('Username of the org').optional(),
         },
         async (params, _ctx) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.OPEN_INSTANCE}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.OPEN_INSTANCE}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result;
             if (!result.response.ok) {
                 return {
@@ -133,12 +134,11 @@ function register(server, context) {
                     }
                 });
             });
-        }
+        },
     );
 }
 
 export default { register };
-
 
 /* - If the credentialType is USERNAME, then do the following:
 1. Call the Org.generateAccessToken tool to generate the access token

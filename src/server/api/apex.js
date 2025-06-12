@@ -3,17 +3,21 @@ const { ipcMainManager } = require('../../libs/ipc.js');
 const { ENDPOINTS } = require('../../../shared');
 
 module.exports = function (app) {
-    app.post(ENDPOINTS.NAVIGATION_NAVIGATE, async (req, res) => {
+    app.post(ENDPOINTS.ANONYMOUS_APEX_EXECUTE, async (req, res) => {
         try {
-            const { alias, application } = req.body;
+            const { alias, body, tabId } = req.body; // logLevel
             const window = getWindowByAlias(alias);
             if (window && window.webContents) {
-                await ipcMainManager.send('electron-navigate-to', { application }, window.webContents);
-                res.json({ status: 'success', message: `Navigated to ${application}` });
+                let result = await ipcMainManager.send(
+                    ENDPOINTS.ANONYMOUS_APEX_EXECUTE,
+                    { alias, body, tabId },
+                    window.webContents,
+                );
+                res.json(result);
             } else {
                 res.status(404).json({
                     status: 'error',
-                    message: `No window found for alias: ${alias}. Please open the SF Toolkit for the alias before calling this endpoint.`,
+                    message: `No window found for alias: ${alias}. Open the SF Toolkit for the alias before calling this endpoint.`,
                 });
             }
         } catch (error) {

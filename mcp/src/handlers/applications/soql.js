@@ -41,11 +41,13 @@ function register(server, context) {
         },
         async (params) => {
             const endpoint = `${context.apiUrl}${ENDPOINTS.SOQL_QUERY}`;
-            const result = await handleFetchWithToolkitCheck(fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result; // In case of error, the content is returned !
             if (result.response.ok) {
                 return {
@@ -66,7 +68,7 @@ function register(server, context) {
                     ],
                 };
             }
-        }
+        },
     );
 
     server.tool(
@@ -77,11 +79,13 @@ function register(server, context) {
             alias: z.string().describe('The alias of the org'),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.SOQL_NAVIGATE_TAB}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.SOQL_NAVIGATE_TAB}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result;
             if (result.response.ok) {
                 return {
@@ -102,7 +106,7 @@ function register(server, context) {
                     ],
                 };
             }
-        }
+        },
     );
 
     server.tool(
@@ -112,11 +116,13 @@ function register(server, context) {
             alias: z.string().describe('The alias of the org'),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.SOQL_QUERIES}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.SOQL_QUERIES}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result;
             if (result.response.ok) {
                 return {
@@ -137,7 +143,7 @@ function register(server, context) {
                     ],
                 };
             }
-        }
+        },
     );
 }
 

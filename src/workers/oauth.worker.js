@@ -1,13 +1,12 @@
 const { exec } = require('node:child_process');
 const encodeError = (errors) => {
-    console.error('Inner: ',errors);
+    console.error('Inner: ', errors);
     // we only handle 1 error for now !! (we could send an array, that's not a problem !)
     let e = [].concat(errors)[0];
     let res = { name: e.name, message: e.message };
     return res;
 };
 const execShellCommand = (cmd, { parseJson = false } = {}) => {
-    
     return new Promise((resolve, reject) => {
         exec(cmd, (error, stdout, stderr) => {
             if (error) {

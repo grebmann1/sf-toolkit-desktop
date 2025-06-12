@@ -28,7 +28,7 @@ function register(server) {
         },
         async (params) => {
             return await soqlQuery(params);
-        }
+        },
     );
     server.tool(
         'RestApi.call',
@@ -43,7 +43,7 @@ function register(server) {
         },
         async (params) => {
             return await restApiCall(params);
-        }
+        },
     );
     server.tool(
         'Metadata.operation',
@@ -51,18 +51,26 @@ function register(server) {
         {
             sessionId: z.string().describe('Salesforce session ID'),
             serverUrl: z.string().describe('Salesforce instance URL'),
-            operation: z.enum(['describe', 'list', 'read', 'create', 'update', 'upsert', 'delete', 'rename']).describe('Metadata operation'),
+            operation: z
+                .enum(['describe', 'list', 'read', 'create', 'update', 'upsert', 'delete', 'rename'])
+                .describe('Metadata operation'),
             metadataType: z.string().optional().describe('Metadata type (e.g. CustomObject, ApexClass, etc.)'),
             version: z.string().optional().describe('API version (for describe/list)'),
-            queries: z.array(z.object({ type: z.string(), folder: z.string().optional() })).optional().describe('List queries (for list)'),
-            fullNames: z.union([z.string(), z.array(z.string())]).optional().describe('Full names (for read/delete)'),
+            queries: z
+                .array(z.object({ type: z.string(), folder: z.string().optional() }))
+                .optional()
+                .describe('List queries (for list)'),
+            fullNames: z
+                .union([z.string(), z.array(z.string())])
+                .optional()
+                .describe('Full names (for read/delete)'),
             metadata: z.any().optional().describe('Metadata object(s) (for create/update/upsert)'),
             oldFullName: z.string().optional().describe('Old full name (for rename)'),
             newFullName: z.string().optional().describe('New full name (for rename)'),
         },
         async (params) => {
             return await metadataOperation(params);
-        }
+        },
     );
     server.tool(
         'Apex.executeAnonymous',
@@ -71,11 +79,14 @@ function register(server) {
             sessionId: z.string().describe('Salesforce session ID'),
             serverUrl: z.string().describe('Salesforce instance URL'),
             apexCode: z.string().describe('Apex code to execute anonymously'),
-            logLevel: z.enum(['NONE', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'FINE', 'FINER', 'FINEST']).optional().describe('Log level for debug logs (optional, defaults to DEBUG)'),
+            logLevel: z
+                .enum(['NONE', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'FINE', 'FINER', 'FINEST'])
+                .optional()
+                .describe('Log level for debug logs (optional, defaults to DEBUG)'),
         },
         async (params) => {
             return await executeApex(params);
-        }
+        },
     );
     server.tool(
         'SObject.describe',
@@ -87,7 +98,7 @@ function register(server) {
         },
         async (params) => {
             return await describeSObject(params);
-        }
+        },
     );
     server.tool(
         'User.getInfo',
@@ -98,7 +109,7 @@ function register(server) {
         },
         async (params) => {
             return await getUserInfo(params);
-        }
+        },
     );
     server.tool(
         'SObject.listAll',
@@ -109,7 +120,7 @@ function register(server) {
         },
         async (params) => {
             return await listSObjects(params);
-        }
+        },
     );
     server.tool(
         'Deployment.getLatest',
@@ -120,11 +131,10 @@ function register(server) {
         },
         async (params) => {
             return await getLatestDeployments(params);
-        }
+        },
     );
     // Add more tool registrations here as you implement them
 }
-
 
 const soqlQuery = async ({ sessionId, serverUrl, soql }) => {
     try {
@@ -150,7 +160,7 @@ const soqlQuery = async ({ sessionId, serverUrl, soql }) => {
             ],
         };
     }
-}
+};
 
 const restApiCall = async ({ sessionId, serverUrl, method, path, body, headers }) => {
     try {
@@ -187,7 +197,7 @@ const restApiCall = async ({ sessionId, serverUrl, method, path, body, headers }
             ],
         };
     }
-}
+};
 
 const metadataOperation = async ({ sessionId, serverUrl, operation, metadataType, ...args }) => {
     try {
@@ -327,8 +337,12 @@ const describeSObject = async ({ sessionId, serverUrl, sobjectType }) => {
         const formattedDescription = `
             Object: ${describe.name} (${describe.label})${describe.custom ? ' (Custom Object)' : ''}
             Fields:
-            ${describe.fields.map((field) => `  - ${field.name} (${field.label})\n    Type: ${field.type}${field.length ? `, Length: ${field.length}` : ''}\n    Required: ${!field.nillable}\n    ${field.referenceTo && field.referenceTo.length > 0 ? `References: ${field.referenceTo.join(', ')}` : ''}\n    ${field.picklistValues && field.picklistValues.length > 0 ? `Picklist Values: ${field.picklistValues.map((v) => v.value).join(', ')}` : ''}`
-        ).join('\n')}`;
+            ${describe.fields
+                .map(
+                    (field) =>
+                        `  - ${field.name} (${field.label})\n    Type: ${field.type}${field.length ? `, Length: ${field.length}` : ''}\n    Required: ${!field.nillable}\n    ${field.referenceTo && field.referenceTo.length > 0 ? `References: ${field.referenceTo.join(', ')}` : ''}\n    ${field.picklistValues && field.picklistValues.length > 0 ? `Picklist Values: ${field.picklistValues.map((v) => v.value).join(', ')}` : ''}`,
+                )
+                .join('\n')}`;
         return {
             content: [
                 {
@@ -388,7 +402,7 @@ const listSObjects = async ({ sessionId, serverUrl }) => {
             content: [
                 {
                     type: 'text',
-                    text: `Standard SObjects (${standard.sobjects.length}):\n${standard.sobjects.map(s => s.name).join(', ')}\n\nTooling SObjects (${tooling.sobjects.length}):\n${tooling.sobjects.map(s => s.name).join(', ')}`,
+                    text: `Standard SObjects (${standard.sobjects.length}):\n${standard.sobjects.map((s) => s.name).join(', ')}\n\nTooling SObjects (${tooling.sobjects.length}):\n${tooling.sobjects.map((s) => s.name).join(', ')}`,
                 },
             ],
             isError: false,
@@ -444,5 +458,17 @@ const getLatestDeployments = async ({ sessionId, serverUrl }) => {
 };
 
 // Export stubs for each integration point (to be implemented one by one)
-export { createConnection, soqlQuery, restApiCall, metadataOperation, executeApex, toolingQuery, bulkOperation, describeSObject, listSObjects, getUserInfo, getLatestDeployments };
-export default { register }; 
+export {
+    createConnection,
+    soqlQuery,
+    restApiCall,
+    metadataOperation,
+    executeApex,
+    toolingQuery,
+    bulkOperation,
+    describeSObject,
+    listSObjects,
+    getUserInfo,
+    getLatestDeployments,
+};
+export default { register };

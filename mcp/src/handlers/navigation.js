@@ -10,25 +10,30 @@ function register(server, context) {
         Ensure that the SF Toolkit is open for the specified alias before using this tool to successfully direct the navigation.`,
         {
             alias: z.string().describe('Alias of the org'),
-            application: z.enum([
-                'soql',
-                'api',
-                'anonymousapex',
-                'org',
-                'metadata',
-                'access',
-                'sobject',
-                'documentation',
-                'platformevent',
-                'package',
-            ]).describe('Target application to navigate to'),
+            application: z
+                .enum([
+                    'soql',
+                    'api',
+                    'anonymousapex',
+                    'org',
+                    'metadata',
+                    'access',
+                    'sobject',
+                    'documentation',
+                    'platformevent',
+                    'package',
+                    'lightning',
+                ])
+                .describe('Target application to navigate to'),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.NAVIGATION_NAVIGATE}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.NAVIGATION_NAVIGATE}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result;
             if (result.response.ok) {
                 return {

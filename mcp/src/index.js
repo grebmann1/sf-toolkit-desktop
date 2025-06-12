@@ -9,30 +9,39 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 //const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
 //const { z } = require('zod');
 // Applications
-import applicationSOQLHandler from './handlers/applications/soql.js';
-import restapiHandler from './handlers/applications/restapi.js';
+import application_soqlHandler from './handlers/applications/soql.js';
+import application_restapiHandler from './handlers/applications/restapi.js';
+import application_apexHandler from './handlers/applications/apex.js';
 // Others
 import globalHandler from './handlers/global.js';
 import orgHandler from './handlers/org.js';
-//const documentationHandler = require('./handlers/documentation');
+import documentationHandler from './handlers/documentation.js';
 import navigationHandler from './handlers/navigation.js';
 
-async function initializeMcpServer(){
+async function initializeMcpServer() {
     const server = new McpServer({
-        name: "sf-toolkit-mcp-server",
-        version: "1.0.0"
+        name: 'sf-toolkit-mcp-server',
+        version: '1.0.0',
     });
     const apiHost = process.env.API_HOST || 'http://localhost';
     const apiPort = process.env.API_PORT || 12346;
     const isOauthDisabled = process.env.OAUTH_DISABLED || false;
-    const context = { mainWindow:null, isDev:false, ipcMainManager:null, apiUrl:`${apiHost}:${apiPort}`, isOauthDisabled };
+    const context = {
+        mainWindow: null,
+        isDev: false,
+        ipcMainManager: null,
+        apiUrl: `${apiHost}:${apiPort}`,
+        isOauthDisabled,
+    };
 
     globalHandler.register(server, context);
     orgHandler.register(server, context);
-    applicationSOQLHandler.register(server, context);   
     navigationHandler.register(server, context);
-    restapiHandler.register(server, context);
-    
+    documentationHandler.register(server, context);
+    application_soqlHandler.register(server, context);
+    application_restapiHandler.register(server, context);
+    application_apexHandler.register(server, context);
+
     const transport = new StdioServerTransport();
     await server.connect(transport);
     /* console.log(JSON.stringify({
@@ -52,10 +61,9 @@ async function initializeMcpServer(){
 try {
     initializeMcpServer();
 } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error('Failed to start server:', error);
     process.exit(1);
 }
-
 
 //jsforceMcpHandler.register(server, context);
 /* 

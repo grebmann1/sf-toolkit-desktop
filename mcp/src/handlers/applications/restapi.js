@@ -16,11 +16,13 @@ function register(server, context) {
             tabId: z.string().optional().describe('The ID of the REST API tab to navigate to'),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.REST_API_EXECUTE}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.REST_API_EXECUTE}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result;
             if (result.response.ok) {
                 return {
@@ -41,7 +43,7 @@ function register(server, context) {
                     ],
                 };
             }
-        }
+        },
     );
     server.tool(
         'RestAPI_getListOfSavedAPIScripts',
@@ -50,11 +52,13 @@ function register(server, context) {
             alias: z.string().describe('The alias of the org'),
         },
         async (params) => {
-            const result = await handleFetchWithToolkitCheck(fetch(`${context.apiUrl}${ENDPOINTS.REST_API_SCRIPTS}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(params)
-            }));
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.REST_API_SCRIPTS}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
             if (result.content) return result;
             if (result.response.ok) {
                 return {
@@ -75,7 +79,8 @@ function register(server, context) {
                     ],
                 };
             }
-    });
+        },
+    );
 }
 
 export default { register };

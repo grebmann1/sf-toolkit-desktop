@@ -321,7 +321,9 @@ _scanCodeWorker = ({ alias, targetPath, webContents, listenerName, command }) =>
     }, 60000 * 2);
     if (workers[workerKey]) throw new Error('Existing instance already processing');
 
-    workers[workerKey] = utilityProcess.fork(path.join(__dirname, 'workers/scanner.worker.js'), [], { cwd: targetPath });
+    workers[workerKey] = utilityProcess.fork(path.join(__dirname, 'workers/scanner.worker.js'), [], {
+        cwd: targetPath,
+    });
     workers[workerKey].postMessage({ params: { alias, command } });
     workers[workerKey].once('exit', () => {
         clearTimeout(timeout);

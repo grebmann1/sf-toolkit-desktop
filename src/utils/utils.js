@@ -21,7 +21,7 @@ function runActionAfterTimeOut(value, action, { timeout = 300 } = {}) {
     return buffer._clearBufferId;
 }
 
-const isNotUndefinedOrNull = (value) => {   
+const isNotUndefinedOrNull = (value) => {
     return value !== undefined && value !== null;
 };
 
@@ -43,10 +43,7 @@ function promiseWithTimeout(promise, ms, errorMessage = 'Timeout exceeded') {
             reject(new Error(errorMessage));
         }, ms);
     });
-    return Promise.race([
-        promise.finally(() => clearTimeout(timeoutId)),
-        timeoutPromise
-    ]);
+    return Promise.race([promise.finally(() => clearTimeout(timeoutId)), timeoutPromise]);
 }
 
 function guid() {
@@ -60,7 +57,6 @@ function guid() {
 }
 
 const execShellCommand = (cmd, { parseJson = false } = {}) => {
-    
     return new Promise((resolve, reject) => {
         exec(cmd, (error, stdout, stderr) => {
             if (error) {
@@ -92,4 +88,13 @@ const killProcessOnPort = async (port) => {
     }
 };
 
-module.exports = { hashCode, runActionAfterTimeOut, isNotUndefinedOrNull, isEmpty, promiseWithTimeout,guid,execShellCommand,killProcessOnPort };
+module.exports = {
+    hashCode,
+    runActionAfterTimeOut,
+    isNotUndefinedOrNull,
+    isEmpty,
+    promiseWithTimeout,
+    guid,
+    execShellCommand,
+    killProcessOnPort,
+};

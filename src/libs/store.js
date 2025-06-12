@@ -38,6 +38,11 @@ class Store {
             console.error('Failed to write store data:', err);
         }
     }
+
+    remove(key) {
+        delete this.data[key];
+        this.set(null, this.data);
+    }
 }
 
 function parseDataFile(filePath, defaults) {

@@ -3,12 +3,20 @@ const { app, shell, utilityProcess } = require('electron');
 const { exec, execSync } = require('child_process');
 const { encodeError } = require('../../utils/errors.js');
 const Store = require('../store.js');
-const { execShellCommand,killProcessOnPort } = require('../../utils/utils.js');
+const { execShellCommand, killProcessOnPort } = require('../../utils/utils.js');
 
 //require('../../workers/oauth.worker.js');
 /** Worker Processing **/
 const workers = {};
 const orgsStore = new Store({ configName: 'orgs', defaults: {} });
+
+const extractName = (alias) => {
+    let nameArray = (alias || '').split('-');
+    return {
+        company: nameArray.length > 1 ? nameArray.shift() : '',
+        name: nameArray.join('-'),
+    };
+};
 
 _handleOAuthInWorker = ({ alias, instanceurl, webContents }) => {
     // Kill child process in case it's too long
@@ -58,7 +66,7 @@ killOauth = async (_) => {
     }
 };
 
-saveOrgInfo = async (_, { alias, configuration }) => {
+setStoredOrg = async (_, { alias, configuration }) => {
     try {
         orgsStore.set(alias, configuration);
         return { res: 'success' };
@@ -71,6 +79,32 @@ getStoredOrgs = async () => {
     try {
         const data = orgsStore.data || {};
         return { res: Object.values(data) };
+    } catch (e) {
+        return { error: encodeError(e) };
+    }
+};
+
+removeStoredOrg = async (_, { alias }) => {
+    try {
+        orgsStore.remove(alias);
+        return { res: 'success' };
+    } catch (e) {
+        return { error: encodeError(e) };
+    }
+};
+
+renameStoredOrg = async (_, { alias, newAlias }) => {
+    try {
+        const { company, name } = extractName(newAlias);
+        if (orgsStore.contains(alias)) {
+            const org = orgsStore.get(alias);
+            org.alias = newAlias;
+            org.company = company;
+            org.name = name;
+            orgsStore.set(newAlias, org);
+            orgsStore.remove(alias);
+        }
+        return { res: 'success' };
     } catch (e) {
         return { error: encodeError(e) };
     }
@@ -114,7 +148,7 @@ seeDetails = async (_, { alias }) => {
     try {
         const [orgDisplay, orgOpen] = await Promise.all([
             execShellCommand(`sfdx force:org:display --json --targetusername ${alias} --verbose`, { parseJson: true }),
-            execShellCommand(`sfdx force:org:open --urlonly --targetusername ${alias} --json`, { parseJson: true })
+            execShellCommand(`sfdx force:org:open --urlonly --targetusername ${alias} --json`, { parseJson: true }),
         ]);
         const res = {
             ...orgDisplay.result,
@@ -129,9 +163,23 @@ seeDetails = async (_, { alias }) => {
 
 openOrgUrl = async (_, { alias, redirectUrl }) => {
     try {
-        const result = await execShellCommand(`sfdx force:org:open --urlonly --targetusername ${alias} --json`, { parseJson: true });
-        if (result && result.result && result.result.url) {
-            let url = result.result.url + (redirectUrl ? `&retURL=${encodeURIComponent(redirectUrl)}` : '');
+        let frontdoorUrl;
+        if (orgsStore.contains(alias)) {
+            const org = orgsStore.get(alias);
+            const connection = new jsforce.Connection({
+                loginUrl: org.instanceUrl || org.loginUrl,
+                version: '60.0',
+            });
+            await connection.login(org.username, org.password);
+            frontdoorUrl = connection.instanceUrl + '/secur/frontdoor.jsp?sid=' + connection.accessToken;
+        } else {
+            const result = await execShellCommand(`sfdx force:org:open --urlonly --targetusername ${alias} --json`, {
+                parseJson: true,
+            });
+            frontdoorUrl = result.result.url;
+        }
+        if (frontdoorUrl) {
+            let url = frontdoorUrl + (redirectUrl ? `&retURL=${encodeURIComponent(redirectUrl)}` : '');
             shell.openExternal(url);
         }
     } catch (e) {
@@ -155,38 +203,33 @@ createNewOrgAlias = async (event, { alias, instanceurl }) => {
     }
 };
 
-unsetAlias = async (_, { alias }) => {
+logout = async (_, { alias }) => {
+    /** To Refactore later **/
     try {
-        // Remove from orgsStore if present
-        if (orgsStore.contains(alias)) {
-            delete orgsStore.data[alias];
-            orgsStore.set(null, orgsStore.data); // Save updated data
-        } else {
-            // Remove from sfdx aliases
-            await execShellCommand(`sfdx force:alias:unset ${alias} --json`, { parseJson: true });
-        }
-        return null;
+        const command = `sf org logout -o ${alias} -p --json`;
+        let response = execSync(command).toString();
+        return { res: response };
     } catch (e) {
         return { error: encodeError(e) };
     }
 };
 
-logout = async (_, { alias }) => {
-    /** To Refactore later **/
+unsetAlias = async (_, { alias }) => {
     try {
-        const command = `sf org logout -o ${alias} -p --json`;
-        let res = execSync(command).toString();
-        return { res };
+        // Remove from sfdx aliases
+        const response = await execShellCommand(`sfdx force:alias:unset ${alias} --json`, { parseJson: true });
+        return { res: response };
     } catch (e) {
-        return { res: null };
-        //return {error: encodeError(e)}
+        return { error: encodeError(e) };
     }
 };
 
 setAlias = async (_, { alias, username }) => {
     try {
-        let response = await execShellCommand(`sfdx force:alias:set ${alias}=${username} --json`, { parseJson: true });
-        return { result: response };
+        const response = await execShellCommand(`sfdx force:alias:set ${alias}=${username} --json`, {
+            parseJson: true,
+        });
+        return { res: response };
     } catch (e) {
         return { error: encodeError(e) };
     }
@@ -201,6 +244,8 @@ module.exports = {
     unsetAlias,
     setAlias,
     logout,
-    saveOrgInfo,
+    setStoredOrg,
+    renameStoredOrg,
+    removeStoredOrg,
     getStoredOrgs,
 };

@@ -1,14 +1,13 @@
 require('dotenv').config();
-const { BrowserWindow, shell,ipcMain } = require('electron');
+const { BrowserWindow, shell, ipcMain } = require('electron');
 const path = require('path');
 const Store = require('./store.js');
 const { ipcMainManager } = require('./ipc.js');
 
-
 const store = new Store({
     configName: 'app-settings',
     defaults: {
-        windowBounds: { width: 800, height: 600 }
+        windowBounds: { width: 800, height: 600 },
     },
 });
 
@@ -31,7 +30,7 @@ const createWindow = ({ parent, alwaysOnTop, alias }) => {
         show: false,
         webPreferences: {
             devTools: true,
-            preload: path.join(__dirname, '..','renderer', 'lib', 'preload.js'),
+            preload: path.join(__dirname, '..', 'renderer', 'lib', 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
             webviewTag: false,
@@ -107,7 +106,6 @@ exports.createMainWindow = ({ isDev, url }) => {
 };
 
 exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }, callback) => {
-    
     console.log(`Creating Instance window`);
     let browserWindow = createWindow({ alias });
     const baseUrl = exports.getBaseUrl(isDev);
@@ -119,7 +117,7 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
     }
 
     browserWindow.webContents.once('dom-ready', () => {
-        let title = alias;     
+        let title = alias;
         if (username) {
             title = `${title}:${username}`;
         }
@@ -128,22 +126,21 @@ exports.createInstanceWindow = ({ isDev, alias, username, sessionId, serverUrl }
 
     // Send the channel name to the renderer after did-finish-load
     browserWindow.webContents.on('did-finish-load', () => {
-        // Unique channel for this window    
-        ipcMainManager.send('set-ready-channel',null, browserWindow.webContents)
-        .then((result) => {
-            if(callback){
-                callback({result});
-            }
-            // Fake Loading for testing !!!
-            //fakeCall();
-        })
-        .catch((error) => {
-            if(callback){
-                callback({error});
-            }
-        });
-
-        
+        // Unique channel for this window
+        ipcMainManager
+            .send('set-ready-channel', null, browserWindow.webContents)
+            .then((result) => {
+                if (callback) {
+                    callback({ result });
+                }
+                // Fake Loading for testing !!!
+                //fakeCall();
+            })
+            .catch((error) => {
+                if (callback) {
+                    callback({ error });
+                }
+            });
     });
 
     /* async function fakeCall() {

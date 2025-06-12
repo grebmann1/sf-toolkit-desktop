@@ -14,9 +14,9 @@ const ENDPOINTS = {
     REST_API_SCRIPTS: '/api/scripts',
     SOQL_NAVIGATE_TAB: '/soql/navigate-tab',
     NAVIGATION_NAVIGATE: '/navigation/navigate',
+    ANONYMOUS_APEX_EXECUTE: '/apex/execute',
 };
 
-
 module.exports = {
-    ENDPOINTS
-}; 
+    ENDPOINTS,
+};
