@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 function register(server, context) {
     server.tool(
-        'RestAPI_restAPI',
+        'API_execute',
         `Execute a REST API call for a given org alias in the SF Toolkit`,
         {
             alias: z.string().describe('The alias of the org'),
@@ -46,7 +46,7 @@ function register(server, context) {
         },
     );
     server.tool(
-        'RestAPI_getListOfSavedAPIScripts',
+        'API_scripts',
         `Fetch the list of saved API scripts for a given org alias in the SF Toolkit`,
         {
             alias: z.string().describe('The alias of the org'),

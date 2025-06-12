@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 function register(server, context) {
     server.tool(
-        'Apex_executeAnonymous',
+        'Apex_execute',
         `Execute anonymous Apex code for a given org alias in the SF Toolkit`,
         {
             alias: z.string().describe('The alias of the org'),
@@ -37,6 +37,42 @@ function register(server, context) {
                         {
                             type: 'text',
                             text: result.data.message || 'Apex execution failed',
+                        },
+                    ],
+                };
+            }
+        },
+    );
+    server.tool(
+        'Apex_scripts',
+        `Get the list of Apex scripts for a given org alias in the SF Toolkit`,
+        {
+            alias: z.string().describe('The alias of the org'),
+        },
+        async (params) => {
+            const result = await handleFetchWithToolkitCheck(
+                fetch(`${context.apiUrl}${ENDPOINTS.ANONYMOUS_APEX_SCRIPTS}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params),
+                }),
+            );
+            if (result.content) return result;
+            if (result.response.ok) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: JSON.stringify(result.data),
+                        },
+                    ],
+                };
+            } else {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: result.data.message || 'Apex scripts failed to load',
                         },
                     ],
                 };

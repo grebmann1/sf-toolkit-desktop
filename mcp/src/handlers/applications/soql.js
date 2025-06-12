@@ -32,7 +32,7 @@ function register(server, context) {
     ); */
 
     server.tool(
-        'SOQL_displayQueryInSFToolkit',
+        'SOQL_execute',
         `Display the query (SOQL) in the SF Toolkit`,
         {
             query: z.string().describe('The query to display'),
@@ -110,7 +110,7 @@ function register(server, context) {
     );
 
     server.tool(
-        'SOQL_fetchQueries',
+        'SOQL_scripts',
         `Fetch the list of SOQL queries for a given org alias in the SF Toolkit`,
         {
             alias: z.string().describe('The alias of the org'),

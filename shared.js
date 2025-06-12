@@ -15,6 +15,7 @@ const ENDPOINTS = {
     SOQL_NAVIGATE_TAB: '/soql/navigate-tab',
     NAVIGATION_NAVIGATE: '/navigation/navigate',
     ANONYMOUS_APEX_EXECUTE: '/apex/execute',
+    ANONYMOUS_APEX_SCRIPTS: '/apex/scripts',
 };
 
 module.exports = {
