@@ -3,7 +3,7 @@ const encodeError = (errors) => {
     console.error(errors);
     let e = [].concat(errors)[0];
     let res = { name: e.name, message: e.message };
-    
+
     return res;
 };
 

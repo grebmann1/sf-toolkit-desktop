@@ -11,12 +11,12 @@ contextBridge.exposeInMainWorld('electron', {
         return await ipcRenderer.sendSync(channel, args); // Investigate if we can use ...args here
     },
     listener_on: (channel, callback) => {
-        ipcRenderer.on(channel, (event,...args) => callback(...args));
+        ipcRenderer.on(channel, (event, ...args) => callback(...args));
     },
     listener_once: (channel, callback) => {
-        ipcRenderer.once(channel, (event,...args) => callback(...args));
+        ipcRenderer.once(channel, (event, ...args) => callback(...args));
     },
     listener_off: (channel) => ipcRenderer.removeAllListeners(channel),
-    setChannel: (channel) => this.channel = channel,
+    setChannel: (channel) => (this.channel = channel),
     getChannel: () => this.channel,
 });

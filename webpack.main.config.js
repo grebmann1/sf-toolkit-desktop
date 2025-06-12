@@ -1,6 +1,6 @@
 require('dotenv').config();
 const path = require('path');
-const webpack = require("webpack");
+const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
@@ -8,9 +8,7 @@ module.exports = {
      * This is the main entry point for your application, it's the first file
      * that runs in the main process.
      */
-    resolve: {
-        
-    },
+    resolve: {},
     entry: './src/main.js',
     // Put your normal webpack config below here
     module: {

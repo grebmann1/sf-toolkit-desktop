@@ -1,49 +1,68 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
+var __createBinding =
+    (this && this.__createBinding) ||
+    (Object.create
+        ? function (o, m, k, k2) {
+              if (k2 === undefined) k2 = k;
+              var desc = Object.getOwnPropertyDescriptor(m, k);
+              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                  desc = {
+                      enumerable: true,
+                      get: function () {
+                          return m[k];
+                      },
+                  };
+              }
+              Object.defineProperty(o, k2, desc);
+          }
+        : function (o, m, k, k2) {
+              if (k2 === undefined) k2 = k;
+              o[k2] = m[k];
+          });
+var __setModuleDefault =
+    (this && this.__setModuleDefault) ||
+    (Object.create
+        ? function (o, v) {
+              Object.defineProperty(o, 'default', { enumerable: true, value: v });
+          }
+        : function (o, v) {
+              o['default'] = v;
+          });
+var __importStar =
+    (this && this.__importStar) ||
+    function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null)
+            for (var k in mod)
+                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+var __importDefault =
+    (this && this.__importDefault) ||
+    function (mod) {
+        return mod && mod.__esModule ? mod : { default: mod };
+    };
+Object.defineProperty(exports, '__esModule', { value: true });
 exports.Connection = void 0;
 /**
  *
  */
-const events_1 = require("events");
-const jsforce_1 = __importDefault(require("./jsforce"));
-const transport_1 = __importStar(require("./transport"));
-const logger_1 = require("./util/logger");
-const oauth2_1 = __importDefault(require("./oauth2"));
-const cache_1 = __importDefault(require("./cache"));
-const http_api_1 = __importDefault(require("./http-api"));
-const session_refresh_delegate_1 = __importDefault(require("./session-refresh-delegate"));
-const query_1 = __importDefault(require("./query"));
-const sobject_1 = __importDefault(require("./sobject"));
-const quick_action_1 = __importDefault(require("./quick-action"));
-const process_1 = __importDefault(require("./process"));
-const formatter_1 = require("./util/formatter");
-const form_data_1 = __importDefault(require("form-data"));
+const events_1 = require('events');
+const jsforce_1 = __importDefault(require('./jsforce'));
+const transport_1 = __importStar(require('./transport'));
+const logger_1 = require('./util/logger');
+const oauth2_1 = __importDefault(require('./oauth2'));
+const cache_1 = __importDefault(require('./cache'));
+const http_api_1 = __importDefault(require('./http-api'));
+const session_refresh_delegate_1 = __importDefault(require('./session-refresh-delegate'));
+const query_1 = __importDefault(require('./query'));
+const sobject_1 = __importDefault(require('./sobject'));
+const quick_action_1 = __importDefault(require('./quick-action'));
+const process_1 = __importDefault(require('./process'));
+const formatter_1 = require('./util/formatter');
+const form_data_1 = __importDefault(require('form-data'));
 /**
  *
  */
@@ -104,12 +123,10 @@ async function oauthRefreshFn(conn, callback) {
             userInfo,
         });
         callback(undefined, res.access_token, res);
-    }
-    catch (err) {
+    } catch (err) {
         if (err instanceof Error) {
             callback(err);
-        }
-        else {
+        } else {
             throw err;
         }
     }
@@ -126,12 +143,10 @@ function createUsernamePasswordRefreshFn(username, password) {
                 throw new Error('Access token not found after login');
             }
             callback(null, conn.accessToken);
-        }
-        catch (err) {
+        } catch (err) {
             if (err instanceof Error) {
                 callback(err);
-            }
-            else {
+            } else {
                 throw err;
             }
         }
@@ -221,7 +236,7 @@ class Connection extends events_1.EventEmitter {
      */
     constructor(config = {}) {
         super();
-        const { loginUrl, instanceUrl, version, oauth2, maxRequest, logLevel, proxyUrl, httpProxy, } = config;
+        const { loginUrl, instanceUrl, version, oauth2, maxRequest, logLevel, proxyUrl, httpProxy } = config;
         this.loginUrl = loginUrl || defaultConnectionConfig.loginUrl;
         this.instanceUrl = instanceUrl || defaultConnectionConfig.instanceUrl;
         if (this.isLightningInstance()) {
@@ -232,11 +247,11 @@ class Connection extends events_1.EventEmitter {
             oauth2 instanceof oauth2_1.default
                 ? oauth2
                 : new oauth2_1.default({
-                    loginUrl: this.loginUrl,
-                    proxyUrl,
-                    httpProxy,
-                    ...oauth2,
-                });
+                      loginUrl: this.loginUrl,
+                      proxyUrl,
+                      httpProxy,
+                      ...oauth2,
+                  });
         let refreshFn = config.refreshFn;
         if (!refreshFn && this.oauth2.clientId) {
             refreshFn = oauthRefreshFn;
@@ -245,18 +260,16 @@ class Connection extends events_1.EventEmitter {
             this._refreshDelegate = new session_refresh_delegate_1.default(this, refreshFn);
         }
         this._maxRequest = maxRequest || defaultConnectionConfig.maxRequest;
-        this._logger = logLevel
-            ? Connection._logger.createInstance(logLevel)
-            : Connection._logger;
+        this._logger = logLevel ? Connection._logger.createInstance(logLevel) : Connection._logger;
         this._logLevel = logLevel;
         this._transport = proxyUrl
             ? new transport_1.XdProxyTransport(proxyUrl)
             : httpProxy
-                ? new transport_1.HttpProxyTransport(httpProxy)
-                : new transport_1.default();
+              ? new transport_1.HttpProxyTransport(httpProxy)
+              : new transport_1.default();
         this._callOptions = config.callOptions;
         this.cache = new cache_1.default();
-        const describeCacheKey = (type) => type ? `describe.${type}` : 'describe';
+        const describeCacheKey = (type) => (type ? `describe.${type}` : 'describe');
         const describe = Connection.prototype.describe;
         this.describe = this.cache.createCachedFunction(describe, this, {
             key: describeCacheKey,
@@ -274,10 +287,19 @@ class Connection extends events_1.EventEmitter {
         this.describeSObject$ = this.describe$;
         this.describeSObject$$ = this.describe$$;
         const describeGlobal = Connection.prototype.describeGlobal;
-        this.describeGlobal = this.cache.createCachedFunction(describeGlobal, this, { key: 'describeGlobal', strategy: 'NOCACHE' });
-        this.describeGlobal$ = this.cache.createCachedFunction(describeGlobal, this, { key: 'describeGlobal', strategy: 'HIT' });
-        this.describeGlobal$$ = this.cache.createCachedFunction(describeGlobal, this, { key: 'describeGlobal', strategy: 'IMMEDIATE' });
-        const { accessToken, refreshToken, sessionId, serverUrl, signedRequest, } = config;
+        this.describeGlobal = this.cache.createCachedFunction(describeGlobal, this, {
+            key: 'describeGlobal',
+            strategy: 'NOCACHE',
+        });
+        this.describeGlobal$ = this.cache.createCachedFunction(describeGlobal, this, {
+            key: 'describeGlobal',
+            strategy: 'HIT',
+        });
+        this.describeGlobal$$ = this.cache.createCachedFunction(describeGlobal, this, {
+            key: 'describeGlobal',
+            strategy: 'IMMEDIATE',
+        });
+        const { accessToken, refreshToken, sessionId, serverUrl, signedRequest } = config;
         this._establish({
             accessToken,
             refreshToken,
@@ -290,10 +312,8 @@ class Connection extends events_1.EventEmitter {
     }
     /* @private */
     _establish(options) {
-        const { accessToken, refreshToken, instanceUrl, sessionId, serverUrl, signedRequest, userInfo, } = options;
-        this.instanceUrl = serverUrl
-            ? serverUrl.split('/').slice(0, 3).join('/')
-            : instanceUrl || this.instanceUrl;
+        const { accessToken, refreshToken, instanceUrl, sessionId, serverUrl, signedRequest, userInfo } = options;
+        this.instanceUrl = serverUrl ? serverUrl.split('/').slice(0, 3).join('/') : instanceUrl || this.instanceUrl;
         this.accessToken = sessionId || accessToken || this.accessToken;
         this.refreshToken = refreshToken || this.refreshToken;
         if (this.refreshToken && !this._refreshDelegate) {
@@ -362,7 +382,10 @@ class Connection extends events_1.EventEmitter {
      *
      */
     async login(username, password) {
-        this._refreshDelegate = new session_refresh_delegate_1.default(this, createUsernamePasswordRefreshFn(username, password));
+        this._refreshDelegate = new session_refresh_delegate_1.default(
+            this,
+            createUsernamePasswordRefreshFn(username, password),
+        );
         if (this.oauth2?.clientId && this.oauth2.clientSecret) {
             return this.loginByOAuth2(username, password);
         }
@@ -400,11 +423,7 @@ class Connection extends events_1.EventEmitter {
             '</se:Body>',
             '</se:Envelope>',
         ].join('');
-        const soapLoginEndpoint = [
-            this.loginUrl,
-            'services/Soap/u',
-            this.version,
-        ].join('/');
+        const soapLoginEndpoint = [this.loginUrl, 'services/Soap/u', this.version].join('/');
         const response = await this._transport.httpRequest({
             method: 'POST',
             url: soapLoginEndpoint,
@@ -673,9 +692,9 @@ class Connection extends events_1.EventEmitter {
     async retrieve(type, ids, options = {}) {
         return Array.isArray(ids)
             ? // check the version whether SObject collection API is supported (42.0)
-                this._ensureVersion(42)
-                    ? this._retrieveMany(type, ids, options)
-                    : this._retrieveParallel(type, ids, options)
+              this._ensureVersion(42)
+                ? this._retrieveMany(type, ids, options)
+                : this._retrieveParallel(type, ids, options)
             : this._retrieveSingle(type, ids, options);
     }
     /** @private */
@@ -695,12 +714,16 @@ class Connection extends events_1.EventEmitter {
         if (ids.length > this._maxRequest) {
             throw new Error('Exceeded max limit of concurrent call');
         }
-        return Promise.all(ids.map((id) => this._retrieveSingle(type, id, options).catch((err) => {
-            if (options.allOrNone || err.errorCode !== 'NOT_FOUND') {
-                throw err;
-            }
-            return null;
-        })));
+        return Promise.all(
+            ids.map((id) =>
+                this._retrieveSingle(type, id, options).catch((err) => {
+                    if (options.allOrNone || err.errorCode !== 'NOT_FOUND') {
+                        throw err;
+                    }
+                    return null;
+                }),
+            ),
+        );
     }
     /** @private */
     async _retrieveMany(type, ids, options) {
@@ -708,8 +731,7 @@ class Connection extends events_1.EventEmitter {
             return [];
         }
         const url = [this._baseUrl(), 'composite', 'sobjects', type].join('/');
-        const fields = options.fields ||
-            (await this.describe$(type)).fields.map((field) => field.name);
+        const fields = options.fields || (await this.describe$(type)).fields.map((field) => field.name);
         return this.request({
             method: 'POST',
             url,
@@ -728,9 +750,9 @@ class Connection extends events_1.EventEmitter {
     async create(type, records, options = {}) {
         const ret = Array.isArray(records)
             ? // check the version whether SObject collection API is supported (42.0)
-                this._ensureVersion(42)
-                    ? await this._createMany(type, records, options)
-                    : await this._createParallel(type, records, options)
+              this._ensureVersion(42)
+                ? await this._createMany(type, records, options)
+                : await this._createParallel(type, records, options)
             : await this._createSingle(type, records, options);
         return ret;
     }
@@ -757,8 +779,7 @@ class Connection extends events_1.EventEmitter {
             });
             contentType = form.getHeaders()['content-type']; // This is necessary to ensure the 'boundary' is present
             body = form;
-        }
-        else {
+        } else {
             // Default behavior: send the request as JSON
             contentType = 'application/json';
             body = JSON.stringify(rec);
@@ -778,14 +799,18 @@ class Connection extends events_1.EventEmitter {
         if (records.length > this._maxRequest) {
             throw new Error('Exceeded max limit of concurrent call');
         }
-        return Promise.all(records.map((record) => this._createSingle(type, record, options).catch((err) => {
-            // be aware that allOrNone in parallel mode will not revert the other successful requests
-            // it only raises error when met at least one failed request.
-            if (options.allOrNone || !err.errorCode) {
-                throw err;
-            }
-            return toSaveResult(err);
-        })));
+        return Promise.all(
+            records.map((record) =>
+                this._createSingle(type, record, options).catch((err) => {
+                    // be aware that allOrNone in parallel mode will not revert the other successful requests
+                    // it only raises error when met at least one failed request.
+                    if (options.allOrNone || !err.errorCode) {
+                        throw err;
+                    }
+                    return toSaveResult(err);
+                }),
+            ),
+        );
     }
     /** @private */
     async _createMany(type, records, options) {
@@ -832,9 +857,9 @@ class Connection extends events_1.EventEmitter {
     update(type, records, options = {}) {
         return Array.isArray(records)
             ? // check the version whether SObject collection API is supported (42.0)
-                this._ensureVersion(42)
-                    ? this._updateMany(type, records, options)
-                    : this._updateParallel(type, records, options)
+              this._ensureVersion(42)
+                ? this._updateMany(type, records, options)
+                : this._updateParallel(type, records, options)
             : this._updateSingle(type, records, options);
     }
     /** @private */
@@ -848,31 +873,38 @@ class Connection extends events_1.EventEmitter {
             throw new Error('No SObject Type defined in record');
         }
         const url = [this._baseUrl(), 'sobjects', sobjectType, id].join('/');
-        return this.request({
-            method: 'PATCH',
-            url,
-            body: JSON.stringify(rec),
-            headers: {
-                ...(options.headers || {}),
-                'content-type': 'application/json',
+        return this.request(
+            {
+                method: 'PATCH',
+                url,
+                body: JSON.stringify(rec),
+                headers: {
+                    ...(options.headers || {}),
+                    'content-type': 'application/json',
+                },
             },
-        }, {
-            noContentResponse: { id, success: true, errors: [] },
-        });
+            {
+                noContentResponse: { id, success: true, errors: [] },
+            },
+        );
     }
     /** @private */
     async _updateParallel(type, records, options) {
         if (records.length > this._maxRequest) {
             throw new Error('Exceeded max limit of concurrent call');
         }
-        return Promise.all(records.map((record) => this._updateSingle(type, record, options).catch((err) => {
-            // be aware that allOrNone in parallel mode will not revert the other successful requests
-            // it only raises error when met at least one failed request.
-            if (options.allOrNone || !err.errorCode) {
-                throw err;
-            }
-            return toSaveResult(err);
-        })));
+        return Promise.all(
+            records.map((record) =>
+                this._updateSingle(type, record, options).catch((err) => {
+                    // be aware that allOrNone in parallel mode will not revert the other successful requests
+                    // it only raises error when met at least one failed request.
+                    if (options.allOrNone || !err.errorCode) {
+                        throw err;
+                    }
+                    return toSaveResult(err);
+                }),
+            ),
+        );
     }
     /** @private */
     async _updateMany(type, records, options) {
@@ -923,29 +955,34 @@ class Connection extends events_1.EventEmitter {
         if (_records.length > this._maxRequest) {
             throw new Error('Exceeded max limit of concurrent call');
         }
-        const results = await Promise.all(_records.map((record) => {
-            const { [extIdField]: extId, type: rtype, attributes, ...rec } = record;
-            const url = [this._baseUrl(), 'sobjects', type, extIdField, extId].join('/');
-            return this.request({
-                method: 'PATCH',
-                url,
-                body: JSON.stringify(rec),
-                headers: {
-                    ...(options.headers || {}),
-                    'content-type': 'application/json',
-                },
-            }, {
-                noContentResponse: { success: true, errors: [] },
-            }).catch((err) => {
-                // Be aware that `allOrNone` option in upsert method
-                // will not revert the other successful requests.
-                // It only raises error when met at least one failed request.
-                if (!isArray || options.allOrNone || !err.errorCode) {
-                    throw err;
-                }
-                return toSaveResult(err);
-            });
-        }));
+        const results = await Promise.all(
+            _records.map((record) => {
+                const { [extIdField]: extId, type: rtype, attributes, ...rec } = record;
+                const url = [this._baseUrl(), 'sobjects', type, extIdField, extId].join('/');
+                return this.request(
+                    {
+                        method: 'PATCH',
+                        url,
+                        body: JSON.stringify(rec),
+                        headers: {
+                            ...(options.headers || {}),
+                            'content-type': 'application/json',
+                        },
+                    },
+                    {
+                        noContentResponse: { success: true, errors: [] },
+                    },
+                ).catch((err) => {
+                    // Be aware that `allOrNone` option in upsert method
+                    // will not revert the other successful requests.
+                    // It only raises error when met at least one failed request.
+                    if (!isArray || options.allOrNone || !err.errorCode) {
+                        throw err;
+                    }
+                    return toSaveResult(err);
+                });
+            }),
+        );
         return isArray ? results : results[0];
     }
     /**
@@ -956,36 +993,43 @@ class Connection extends events_1.EventEmitter {
     async destroy(type, ids, options = {}) {
         return Array.isArray(ids)
             ? // check the version whether SObject collection API is supported (42.0)
-                this._ensureVersion(42)
-                    ? this._destroyMany(type, ids, options)
-                    : this._destroyParallel(type, ids, options)
+              this._ensureVersion(42)
+                ? this._destroyMany(type, ids, options)
+                : this._destroyParallel(type, ids, options)
             : this._destroySingle(type, ids, options);
     }
     /** @private */
     async _destroySingle(type, id, options) {
         const url = [this._baseUrl(), 'sobjects', type, id].join('/');
-        return this.request({
-            method: 'DELETE',
-            url,
-            headers: options.headers || {},
-        }, {
-            noContentResponse: { id, success: true, errors: [] },
-        });
+        return this.request(
+            {
+                method: 'DELETE',
+                url,
+                headers: options.headers || {},
+            },
+            {
+                noContentResponse: { id, success: true, errors: [] },
+            },
+        );
     }
     /** @private */
     async _destroyParallel(type, ids, options) {
         if (ids.length > this._maxRequest) {
             throw new Error('Exceeded max limit of concurrent call');
         }
-        return Promise.all(ids.map((id) => this._destroySingle(type, id, options).catch((err) => {
-            // Be aware that `allOrNone` option in parallel mode
-            // will not revert the other successful requests.
-            // It only raises error when met at least one failed request.
-            if (options.allOrNone || !err.errorCode) {
-                throw err;
-            }
-            return toSaveResult(err);
-        })));
+        return Promise.all(
+            ids.map((id) =>
+                this._destroySingle(type, id, options).catch((err) => {
+                    // Be aware that `allOrNone` option in parallel mode
+                    // will not revert the other successful requests.
+                    // It only raises error when met at least one failed request.
+                    if (options.allOrNone || !err.errorCode) {
+                        throw err;
+                    }
+                    return toSaveResult(err);
+                }),
+            ),
+        );
     }
     /** @private */
     async _destroyMany(type, ids, options) {
@@ -1163,9 +1207,11 @@ class Connection extends events_1.EventEmitter {
      */
     process = new process_1.default(this);
     isLightningInstance() {
-        return (this.instanceUrl.includes('.lightning.force.com') ||
+        return (
+            this.instanceUrl.includes('.lightning.force.com') ||
             this.instanceUrl.includes('.lightning.crmforce.mil') ||
-            this.instanceUrl.includes('.lightning.sfcrmapps.cn'));
+            this.instanceUrl.includes('.lightning.sfcrmapps.cn')
+        );
     }
 }
 exports.Connection = Connection;

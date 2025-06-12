@@ -1,6 +1,5 @@
 require('fix-path')();
-
-const { app, nativeImage } = require('electron');
+const { app, nativeImage, Menu } = require('electron');
 const { browserWindows, createMainWindow, createInstanceWindow, getWindowByAlias } = require('./libs/window.js');
 const { ipcMainManager } = require('./libs/ipc.js');
 const { enableEventListeners } = require('./libs/connector.js');
@@ -9,11 +8,11 @@ const Store = require('./libs/store.js');
 const expressApiServer = require('./server/api');
 
 /** Menu **/
-//require('./utils/menu.js');
-
+const { menu } = require('./menu.js');
+Menu.setApplicationMenu(menu);
 /** Auto Updater **/
 const isDev = process.env.NODE_ENV === 'development';
-console.log('process.env.PROD_URL',process.env.PROD_URL);
+console.log('process.env.PROD_URL', process.env.PROD_URL);
 console.log('---> isDev   <---', isDev);
 console.log('---> isPackaged   <---', app.isPackaged);
 
@@ -21,7 +20,6 @@ console.log('---> isPackaged   <---', app.isPackaged);
 if (app.isPackaged) {
     const { updateElectronApp } = require('update-electron-app');
     updateElectronApp(); // additional configuration options available
-    
 } else {
     /*require('electron-reload')(__dirname, {
       electron: path.join(__dirname,'node_modules', '.bin', 'electron')
@@ -64,7 +62,6 @@ if (process.defaultApp) {
 } else {
     app.setAsDefaultProtocolClient('sf-toolkit');
 }
-
 
 // Handle protocol URLs (macOS)
 app.on('open-url', (event, url) => {

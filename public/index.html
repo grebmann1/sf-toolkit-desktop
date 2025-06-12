@@ -1,35 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Fake Frontend for Electron Test</title>
-    <script>
-        // Wait for Electron to inject the channel name
-        let readyChannel = null;
-        function sendReady() {
-            if (readyChannel && window.require) {
-                const { ipcRenderer } = window.require('electron');
-                ipcRenderer.send(readyChannel);
-                document.getElementById('status').textContent = 'Ready signal sent!';
+    <head>
+        <meta charset="UTF-8" />
+        <title>Fake Frontend for Electron Test</title>
+        <script>
+            // Wait for Electron to inject the channel name
+            let readyChannel = null;
+            function sendReady() {
+                if (readyChannel && window.require) {
+                    const { ipcRenderer } = window.require('electron');
+                    ipcRenderer.send(readyChannel);
+                    document.getElementById('status').textContent = 'Ready signal sent!';
+                }
             }
-        }
-        window.addEventListener('DOMContentLoaded', () => {
-            if (window.require) {
-                const { ipcRenderer } = window.require('electron');
-                ipcRenderer.on('set-ready-channel', (event, channel) => {
-                    readyChannel = channel;
-                    document.getElementById('status').textContent = 'Channel received: ' + channel;
-                    // Simulate app initialization delay
-                    setTimeout(sendReady, 2000);
-                });
-            } else {
-                document.getElementById('status').textContent = 'Not running in Electron!';
-            }
-        });
-    </script>
-</head>
-<body>
-    <h1>Fake Electron Frontend</h1>
-    <p id="status">Waiting for channel...</p>
-</body>
-</html> 
+            window.addEventListener('DOMContentLoaded', () => {
+                if (window.require) {
+                    const { ipcRenderer } = window.require('electron');
+                    ipcRenderer.on('set-ready-channel', (event, channel) => {
+                        readyChannel = channel;
+                        document.getElementById('status').textContent = 'Channel received: ' + channel;
+                        // Simulate app initialization delay
+                        setTimeout(sendReady, 2000);
+                    });
+                } else {
+                    document.getElementById('status').textContent = 'Not running in Electron!';
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Fake Electron Frontend</h1>
+        <p id="status">Waiting for channel...</p>
+    </body>
+</html>
